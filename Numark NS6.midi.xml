@@ -622,6 +622,25 @@
                     <selectknob/>
                 </options>
             </control>
+            <!-- LAYER. The controller switches channels by itself; script only has to refresh the LEDs, which would otherwise show the outgoing deck until something on the new one happened to change. -->
+            <control>
+                <group>[Master]</group>
+                <key>NS6.layer</key>
+                <status>0x90</status>
+                <midino>0x04</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.layer</key>
+                <status>0x90</status>
+                <midino>0x05</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
             <!-- FX SEND to the master mix, below the MASTER VOLUME knob. -->
             <control>
                 <group>[EffectRack1_EffectUnit1]</group>

@@ -86,6 +86,14 @@ python3 tools/generate-mapping.py
 
 Edit the tables at the top of that script, not the XML.
 
+## LEDs
+
+The `<outputs>` section is **unverified**. It assumes a button lights when sent
+the note it emits, which is the usual convention but has not been confirmed on
+an NS6, and cannot be read out of the vendor driver — Serato holds that table,
+not the driver. If the lights misbehave, that is why. See
+[docs/MIDI-MAP.md](docs/MIDI-MAP.md#leds--not-yet-verified).
+
 ## Gaps
 
 A handful of controls were never captured and so are not mapped: the eight

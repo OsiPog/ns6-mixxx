@@ -139,7 +139,36 @@ Honest gaps, rather than guesses:
   CC 85 rests at 64, so it is probably something that centres — CUE BLEND on the
   front panel would fit.
 
-## LEDs
+## LEDs — not yet verified
 
-Buttons light when sent the note they send. The mapping's `<outputs>` section
-uses that directly: note-on with velocity 127 lights, 0 clears.
+**The output direction is a guess.** Everything above was recorded from the
+hardware; this section was not.
+
+The mapping's `<outputs>` section assumes the usual convention on controllers of
+this era — that sending a button the note it emits lights it, velocity 127 on
+and 0 off. That has not been confirmed on an NS6, and there is no way to confirm
+it from the vendor driver either: `ns6_usb.sys` forwards whatever the host sends
+down the MIDI OUT pipe and holds no LED table of its own. Serato ITCH has it.
+
+The NS6 also has lights that no button sends: the platter rings, the BPM meter,
+the takeover LEDs beside each pitch fader. Those cannot follow the convention,
+because there is no input note to mirror.
+
+`ns6 leds` in [ns6-rs](https://github.com/OsiPog/ns6-rs) walks the output space
+to settle it — one note lit at a time across all five channels, recording what
+each one turns on. This section will be replaced with the result.
+
+### Frame format
+
+Whatever the note numbers turn out to be, MIDI **out** is framed, unlike MIDI
+in. Every write to the device is one fixed 42-byte packet:
+
+```text
+[0 .. 39)  up to 39 MIDI bytes
+[39, 40]   0xFD filler
+[41]       device control byte, 0xE0 unless something sets it
+```
+
+The buffer is pre-filled with `0xFD` and then overwritten, so short messages are
+padded rather than truncated. Raw MIDI written without this frame is simply
+never parsed — which is worth knowing, because the pipe accepts it either way.

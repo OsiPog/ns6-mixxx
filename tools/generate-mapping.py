@@ -167,6 +167,12 @@ for unit, (onoff, mix, sel, sel_press, param) in FX_UNITS.items():
     x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "meta", 0xB0, param, ["selectknob"])
     if sel_press is not None:
         x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "enabled", 0x90, sel_press, ["Button"])
+x.comment(3, "LAYER. The controller switches channels by itself; script only has to "
+             "refresh the LEDs, which would otherwise show the outgoing deck until "
+             "something on the new one happened to change.")
+x.control("[Master]", "NS6.layer", 0x90, 0x04, ["script-binding"])
+x.control("[Master]", "NS6.layer", 0x90, 0x05, ["script-binding"])
+
 x.comment(3, "FX SEND to the master mix, below the MASTER VOLUME knob.")
 x.control("[EffectRack1_EffectUnit1]", "group_[Master]_enable", 0x90, 0x45, ["Button"])
 x.control("[EffectRack1_EffectUnit2]", "group_[Master]_enable", 0x90, 0x46, ["Button"])
