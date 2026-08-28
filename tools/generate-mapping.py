@@ -169,6 +169,54 @@ x.line(2, "<description>Numark NS6 (original, USB 15e4:0079), all four decks. "
           "</description>")
 x.line(2, "<forums></forums>")
 x.line(1, "</info>")
+x.comment(1, "Shown in Mixxx under Preferences -> Controllers -> Numark NS6, so "
+             "the platter can be dialled in with the wheel in your hand rather "
+             "than by editing the script and restarting.")
+x.line(1, "<settings>")
+x.line(2, '<group label="Platter">')
+
+x.line(3, '<option variable="scratchSensitivity" type="real" min="0.25" max="8" '
+          'step="0.25" default="2" label="Scratch sensitivity">')
+x.line(4, "<description>")
+x.line(5, "Turns of a 33 1/3 record per turn of the platter, while scratching. "
+          "At 1 the platter behaves as a 12-inch turntable; the NS6 wheel is "
+          "roughly half that across, so 2 makes a gesture at the rim cover the "
+          "audio a turntable would. Raise it to scratch faster.")
+x.line(4, "</description>")
+x.line(3, "</option>")
+
+x.line(3, '<option variable="bendPerRevolution" type="integer" min="50" '
+          'max="4000" default="800" label="Pitch bend per revolution">')
+x.line(4, "<description>")
+x.line(5, "How hard the platter bends pitch when SCRATCH is off. Mixxx scales "
+          "this down hard before it reaches the rate, so the number has to be "
+          "large before the bend is felt at all.")
+x.line(4, "</description>")
+x.line(3, "</option>")
+
+x.line(3, '<option variable="scratchSmoothing" type="real" min="0.05" max="1" '
+          'step="0.05" default="1" label="Scratch smoothing">')
+x.line(4, "<description>")
+x.line(5, "How much of each reported platter position is believed. 1 is no "
+          "smoothing at all: the audio moves exactly as the wheel does and "
+          "stops dead when your hand does. Lower it only if the platter's own "
+          "resolution makes slow moves sound stepped.")
+x.line(4, "</description>")
+x.line(3, "</option>")
+
+x.line(3, '<option variable="ticksPerRevolution" type="integer" min="64" '
+          'max="16384" default="16384" label="Platter ticks per revolution">')
+x.line(4, "<description>")
+x.line(5, "How many steps the platter reports for one full turn. A property of "
+          "the hardware rather than a preference, and not yet measured - "
+          "`ns6 jog` in the ns6 driver reports it. Everything the platter does "
+          "scales with this, so scratch sensitivity above is the better knob "
+          "for feel.")
+x.line(4, "</description>")
+x.line(3, "</option>")
+
+x.line(2, "</group>")
+x.line(1, "</settings>")
 x.line(1, '<controller id="Numark NS6">')
 x.line(2, "<scriptfiles>")
 x.line(3, '<file filename="Numark-NS6-scripts.js" functionprefix="NS6"/>')

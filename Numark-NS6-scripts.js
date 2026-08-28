@@ -96,7 +96,25 @@ NS6.deckState = function (group) {
 
 // --- Lifecycle ---------------------------------------------------------------
 
+// Read the tuning from Preferences -> Controllers, falling back to the values
+// above when a setting is absent - which is the case for a mapping that has
+// never had its settings saved.
+NS6.applySettings = function () {
+    var setting = function (name, current) {
+        var value = engine.getSetting(name);
+        return value === undefined || value === null ? current : value;
+    };
+    NS6.scratchSensitivity = setting("scratchSensitivity", NS6.scratchSensitivity);
+    NS6.bendPerRevolution = setting("bendPerRevolution", NS6.bendPerRevolution);
+    NS6.ticksPerRevolution = setting("ticksPerRevolution", NS6.ticksPerRevolution);
+    // Only alpha is exposed. Raising beta off zero is what makes the platter
+    // coast after your hand stops it, which is the thing this mapping set out
+    // to avoid, so it stays where it is.
+    NS6.scratchAlpha = setting("scratchSmoothing", NS6.scratchAlpha);
+};
+
 NS6.init = function () {
+    NS6.applySettings();
     NS6.connectSide("A");
     NS6.connectSide("B");
 };

@@ -6,6 +6,31 @@
         <description>Numark NS6 (original, USB 15e4:0079), all four decks. Needs a driver that presents the NS6 as a MIDI device: Numark's own on Windows and macOS, or ns6 (github.com/OsiPog/ns6-rs) on Linux, where the NS6 has no class-compliant MIDI interface at all.</description>
         <forums></forums>
     </info>
+    <!-- Shown in Mixxx under Preferences -&gt; Controllers -&gt; Numark NS6, so the platter can be dialled in with the wheel in your hand rather than by editing the script and restarting. -->
+    <settings>
+        <group label="Platter">
+            <option variable="scratchSensitivity" type="real" min="0.25" max="8" step="0.25" default="2" label="Scratch sensitivity">
+                <description>
+                    Turns of a 33 1/3 record per turn of the platter, while scratching. At 1 the platter behaves as a 12-inch turntable; the NS6 wheel is roughly half that across, so 2 makes a gesture at the rim cover the audio a turntable would. Raise it to scratch faster.
+                </description>
+            </option>
+            <option variable="bendPerRevolution" type="integer" min="50" max="4000" default="800" label="Pitch bend per revolution">
+                <description>
+                    How hard the platter bends pitch when SCRATCH is off. Mixxx scales this down hard before it reaches the rate, so the number has to be large before the bend is felt at all.
+                </description>
+            </option>
+            <option variable="scratchSmoothing" type="real" min="0.05" max="1" step="0.05" default="1" label="Scratch smoothing">
+                <description>
+                    How much of each reported platter position is believed. 1 is no smoothing at all: the audio moves exactly as the wheel does and stops dead when your hand does. Lower it only if the platter's own resolution makes slow moves sound stepped.
+                </description>
+            </option>
+            <option variable="ticksPerRevolution" type="integer" min="64" max="16384" default="16384" label="Platter ticks per revolution">
+                <description>
+                    How many steps the platter reports for one full turn. A property of the hardware rather than a preference, and not yet measured - `ns6 jog` in the ns6 driver reports it. Everything the platter does scales with this, so scratch sensitivity above is the better knob for feel.
+                </description>
+            </option>
+        </group>
+    </settings>
     <controller id="Numark NS6">
         <scriptfiles>
             <file filename="Numark-NS6-scripts.js" functionprefix="NS6"/>
