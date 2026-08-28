@@ -296,3 +296,36 @@ NS6.loopButton1 = function (c, ctl, value, s, group) { NS6.loopButton(1, value, 
 NS6.loopButton2 = function (c, ctl, value, s, group) { NS6.loopButton(2, value, group); };
 NS6.loopButton3 = function (c, ctl, value, s, group) { NS6.loopButton(3, value, group); };
 NS6.loopButton4 = function (c, ctl, value, s, group) { NS6.loopButton(4, value, group); };
+
+// --- LAYER --------------------------------------------------------------
+
+// Keys whose LEDs are per-deck, and so go stale when a deck side switches
+// channel. Mixxx has no idea a layer flipped - the controller just starts
+// talking on a different channel - so the lights have to be pushed again.
+NS6.deckOutputs = [
+    "play_indicator",
+    "cue_indicator",
+    "sync_enabled",
+    "keylock",
+    "loop_enabled",
+    "hotcue_1_status",
+    "hotcue_2_status",
+    "hotcue_3_status",
+    "hotcue_4_status",
+    "hotcue_5_status",
+];
+
+// LAYER, on channel 1. Which way it went is not reported, only that it moved,
+// so every deck is refreshed - the ones that did not change simply resend what
+// they were already showing.
+NS6.layer = function (channel, control, value, status, group) {
+    if (value === 0) {
+        return;
+    }
+    for (var deck = 1; deck <= 4; deck++) {
+        var deckGroup = "[Channel" + deck + "]";
+        for (var i = 0; i < NS6.deckOutputs.length; i++) {
+            engine.trigger(deckGroup, NS6.deckOutputs[i]);
+        }
+    }
+};
