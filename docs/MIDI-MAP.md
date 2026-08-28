@@ -139,29 +139,79 @@ Honest gaps, rather than guesses:
   CC 85 rests at 64, so it is probably something that centres — CUE BLEND on the
   front panel would fit.
 
-## LEDs — not yet verified
+## LEDs
 
-**The output direction is a guess.** Everything above was recorded from the
-hardware; this section was not.
+Recorded from the hardware the same way as the inputs, by sending each message
+and watching the panel. The raw recording is in
+[recorded-leds.toml](recorded-leds.toml).
 
-The mapping's `<outputs>` section assumes the usual convention on controllers of
-this era — that sending a button the note it emits lights it, velocity 127 on
-and 0 off. That has not been confirmed on an NS6, and there is no way to confirm
-it from the vendor driver either: `ns6_usb.sys` forwards whatever the host sends
-down the MIDI OUT pipe and holds no LED table of its own. Serato ITCH has it.
+Three things are worth knowing before reading the tables.
 
-The NS6 also has lights that no button sends: the platter rings, the BPM meter,
-the takeover LEDs beside each pitch fader. Those cannot follow the convention,
-because there is no input note to mirror.
+**LEDs are Control Change**, never note on. A full sweep of note on across all
+five channels lights nothing at all.
 
-`ns6 leds` in [ns6-rs](https://github.com/OsiPog/ns6-rs) walks the output space
-to settle it — one note lit at a time across all five channels, recording what
-each one turns on. This section will be replaced with the result.
+**The numbers have no relation to the input notes.** SYNC sends note 15 and is
+lit by CC 7; PLAY sends note 17 and is lit by CC 9. There is no single offset
+between the two — the groups shift by different amounts.
+
+**Deck LEDs are addressed by physical side, not by deck.** Channel 2 is the left
+deck and channel 3 the right, whichever layer each is on. This is the opposite
+of the input side, where the layer changes which channel a deck transmits on. So
+software has to route: when the left deck is switched to layer 3, deck 3's state
+has to be sent to channel 2.
+
+Panel-wide lights respond on *any* channel, which is why a sweep shows them
+repeatedly.
+
+### Per deck — channel 2 (left) or 3 (right)
+
+| CC | Dec | Lights |
+|---|---|---|
+| 0x07 | 7 | SYNC |
+| 0x08 | 8 | CUE |
+| 0x09 | 9 | PLAY |
+| 0x0A | 10 | DELETE CUE / SHIFT |
+| 0x0B–0x0F | 11–15 | HOT CUE 1–5 |
+| 0x10 | 16 | MASTER TEMPO |
+| 0x12 | 18 | SCRATCH |
+| 0x15 | 21 | LOOP ON/OFF |
+| 0x16 | 22 | BLEEP / REVERSE |
+| 0x18 | 24 | LOOP MODE |
+| 0x19–0x1C | 25–28 | LOOP IN / OUT / SELECT / RELOOP |
+| 0x37 | 55 | Pitch fader 0% |
+| 0x3C | 60 | Pitch takeover, up arrow |
+| 0x3D | 61 | Pitch takeover, down arrow |
+
+### Panel-wide — channel 1
+
+| CC | Dec | Lights |
+|---|---|---|
+| 0x03 | 3 | CRATES |
+| 0x04 | 4 | PREPARE |
+| 0x05 | 5 | FILES |
+| 0x11 | 17 | Left deck is on layer 3 |
+| 0x28 | 40 | Right deck is on layer 4 |
+| 0x17 | 23 | FX A on/off |
+| 0x2E | 46 | FX B on/off |
+| 0x44–0x4B | 68–75 | FX SEND, channel 1 A/B through channel 4 A/B |
+| 0x4C | 76 | FX SEND A to master |
+| 0x4D | 77 | FX SEND B to master |
+
+### One message will take the device off the USB bus
+
+**CC 57 on channel 1** drops the NS6 off the bus; it needs a power cycle to come
+back. It is not a MIDI message as far as the hardware is concerned. The MIDI OUT
+byte stream doubles as a serial register interface into an audio chip — the
+vendor driver clocks bits through it with the byte patterns
+`addr | 0x00/0x40/0x80/0xC0/0xE0` — so some values reach hardware that has
+nothing to do with lighting buttons.
+
+Others may exist. Anything not listed above was swept and did nothing, but that
+was with value 127; other values were not tried.
 
 ### Frame format
 
-Whatever the note numbers turn out to be, MIDI **out** is framed, unlike MIDI
-in. Every write to the device is one fixed 42-byte packet:
+MIDI **out** is framed, unlike MIDI in. Every write is one fixed 42-byte packet:
 
 ```text
 [0 .. 39)  up to 39 MIDI bytes
@@ -170,5 +220,6 @@ in. Every write to the device is one fixed 42-byte packet:
 ```
 
 The buffer is pre-filled with `0xFD` and then overwritten, so short messages are
-padded rather than truncated. Raw MIDI written without this frame is simply
-never parsed — which is worth knowing, because the pipe accepts it either way.
+padded rather than truncated. Raw MIDI written without this frame is never
+parsed — worth knowing, because the pipe accepts it either way and reports
+success.

@@ -66,10 +66,16 @@ transmit on a different MIDI channel, and all four channels are mapped.
 
 At the top of `Numark-NS6-scripts.js`:
 
-- `ticksPerRevolution` — how far the platter scratches. Raise it if scratching
-  feels too fast.
-- `bendScale` — how hard the platter bends pitch when SCRATCH is off.
+- `scratchSensitivity` — how much audio the platter covers per turn while
+  scratching, in turns of a 33 1/3 record. Raise it to scratch faster.
+- `bendPerRevolution` — how hard the platter bends pitch when SCRATCH is off.
+  Mixxx scales the jog control down a long way, so this number is large.
 - `beatsPerRevolution` — how far the platter jumps while SKIP is held.
+- `fxParamClicks` — clicks to sweep FX PARAM from nothing to full.
+- `ticksPerRevolution` — the platter's own resolution, not a feel setting. It
+  is assumed to be the full 14-bit range and **has not been checked against a
+  counted number of turns**; if it is wrong, everything the platter does is off
+  by the same factor. Measure it before reaching for the two settings above.
 
 In `Numark NS6.midi.xml`, the pitch faders carry `<invert/>`. If yours run
 backwards, take it out — DJ software disagrees about which end of a pitch fader
@@ -88,11 +94,16 @@ Edit the tables at the top of that script, not the XML.
 
 ## LEDs
 
-The `<outputs>` section is **unverified**. It assumes a button lights when sent
-the note it emits, which is the usual convention but has not been confirmed on
-an NS6, and cannot be read out of the vendor driver — Serato holds that table,
-not the driver. If the lights misbehave, that is why. See
-[docs/MIDI-MAP.md](docs/MIDI-MAP.md#leds--not-yet-verified).
+Recorded from the hardware, not assumed. They turned out to be Control Change
+rather than note on, with numbers unrelated to the input notes, and addressed by
+physical deck side rather than by deck — so the left deck's lights are on
+channel 2 whichever layer it is showing. The mapping routes between that and
+Mixxx's per-deck controls, and re-points a side's lights when its LAYER button
+is pressed.
+
+One caution if you go poking at this yourself: **CC 57 on channel 1 takes the
+device off the USB bus** and needs a power cycle. See
+[docs/MIDI-MAP.md](docs/MIDI-MAP.md#leds).
 
 ## Gaps
 

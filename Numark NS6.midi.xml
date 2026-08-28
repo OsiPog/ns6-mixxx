@@ -551,20 +551,20 @@
             </control>
             <control>
                 <group>[EffectRack1_EffectUnit1_Effect1]</group>
-                <key>effect_selector</key>
+                <key>NS6.fxSelect</key>
                 <status>0xB0</status>
                 <midino>0x5A</midino>
                 <options>
-                    <selectknob/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[EffectRack1_EffectUnit1_Effect1]</group>
-                <key>meta</key>
+                <key>NS6.fxParam</key>
                 <status>0xB0</status>
                 <midino>0x56</midino>
                 <options>
-                    <selectknob/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
@@ -606,20 +606,20 @@
             </control>
             <control>
                 <group>[EffectRack1_EffectUnit2_Effect1]</group>
-                <key>effect_selector</key>
+                <key>NS6.fxSelect</key>
                 <status>0xB0</status>
                 <midino>0x5B</midino>
                 <options>
-                    <selectknob/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[EffectRack1_EffectUnit2_Effect1]</group>
-                <key>meta</key>
+                <key>NS6.fxParam</key>
                 <status>0xB0</status>
                 <midino>0x58</midino>
                 <options>
-                    <selectknob/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- LAYER. The controller switches channels by itself; script only has to refresh the LEDs, which would otherwise show the outgoing deck until something on the new one happened to change. -->
@@ -1998,372 +1998,102 @@
             <!-- The per-channel FX SEND buttons are not mapped: their note numbers were never captured. Only the two master FX SEND buttons, and the scroll knob's press, are missing from this mapping for the same reason. -->
         </controls>
         <outputs>
-            <!-- LEDs. The controller lights a button when it is sent the same note it sends, so the output map mirrors the input map. -->
-            <output>
-                <group>[Channel1]</group>
-                <key>pfl</key>
-                <status>0x90</status>
-                <midino>0x31</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>pfl</key>
-                <status>0x90</status>
-                <midino>0x32</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>pfl</key>
-                <status>0x90</status>
-                <midino>0x33</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>pfl</key>
-                <status>0x90</status>
-                <midino>0x34</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
+            <!-- LEDs are control change, not note on, and their numbers bear no relation to the notes the same buttons send. Recorded from the hardware; see docs/recorded-leds.toml. -->
+            <!-- Only the panel-wide lights are here. The per-deck ones are driven from script, because they are addressed by physical deck side - channel 2 is the left deck whichever layer it is on - and Mixxx controls are per deck, so something has to route between them. -->
             <output>
                 <group>[EffectRack1_EffectUnit1]</group>
                 <key>enabled</key>
-                <status>0x90</status>
-                <midino>0x2D</midino>
+                <status>0xB0</status>
+                <midino>0x17</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
                 <group>[EffectRack1_EffectUnit2]</group>
                 <key>enabled</key>
-                <status>0x90</status>
-                <midino>0x2F</midino>
+                <status>0xB0</status>
+                <midino>0x2E</midino>
+                <on>0x7F</on>
+                <off>0x00</off>
+            </output>
+            <!-- FX SEND, per mixer channel and for the master mix. -->
+            <output>
+                <group>[EffectRack1_EffectUnit1]</group>
+                <key>group_[Channel1]_enable</key>
+                <status>0xB0</status>
+                <midino>0x44</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>play_indicator</key>
-                <status>0x91</status>
-                <midino>0x11</midino>
+                <group>[EffectRack1_EffectUnit2]</group>
+                <key>group_[Channel1]_enable</key>
+                <status>0xB0</status>
+                <midino>0x45</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>cue_indicator</key>
-                <status>0x91</status>
-                <midino>0x10</midino>
+                <group>[EffectRack1_EffectUnit1]</group>
+                <key>group_[Channel2]_enable</key>
+                <status>0xB0</status>
+                <midino>0x46</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>sync_enabled</key>
-                <status>0x91</status>
-                <midino>0x0F</midino>
+                <group>[EffectRack1_EffectUnit2]</group>
+                <key>group_[Channel2]_enable</key>
+                <status>0xB0</status>
+                <midino>0x47</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>keylock</key>
-                <status>0x91</status>
-                <midino>0x1B</midino>
+                <group>[EffectRack1_EffectUnit1]</group>
+                <key>group_[Channel3]_enable</key>
+                <status>0xB0</status>
+                <midino>0x48</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>loop_enabled</key>
-                <status>0x91</status>
-                <midino>0x24</midino>
+                <group>[EffectRack1_EffectUnit2]</group>
+                <key>group_[Channel3]_enable</key>
+                <status>0xB0</status>
+                <midino>0x49</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>hotcue_1_status</key>
-                <status>0x91</status>
-                <midino>0x13</midino>
+                <group>[EffectRack1_EffectUnit1]</group>
+                <key>group_[Channel4]_enable</key>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>hotcue_2_status</key>
-                <status>0x91</status>
-                <midino>0x14</midino>
+                <group>[EffectRack1_EffectUnit2]</group>
+                <key>group_[Channel4]_enable</key>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>hotcue_3_status</key>
-                <status>0x91</status>
-                <midino>0x15</midino>
+                <group>[EffectRack1_EffectUnit1]</group>
+                <key>group_[Master]_enable</key>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>
             <output>
-                <group>[Channel1]</group>
-                <key>hotcue_4_status</key>
-                <status>0x91</status>
-                <midino>0x16</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>hotcue_5_status</key>
-                <status>0x91</status>
-                <midino>0x17</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>play_indicator</key>
-                <status>0x92</status>
-                <midino>0x11</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>cue_indicator</key>
-                <status>0x92</status>
-                <midino>0x10</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>sync_enabled</key>
-                <status>0x92</status>
-                <midino>0x0F</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>keylock</key>
-                <status>0x92</status>
-                <midino>0x1B</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>loop_enabled</key>
-                <status>0x92</status>
-                <midino>0x24</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>hotcue_1_status</key>
-                <status>0x92</status>
-                <midino>0x13</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>hotcue_2_status</key>
-                <status>0x92</status>
-                <midino>0x14</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>hotcue_3_status</key>
-                <status>0x92</status>
-                <midino>0x15</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>hotcue_4_status</key>
-                <status>0x92</status>
-                <midino>0x16</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel2]</group>
-                <key>hotcue_5_status</key>
-                <status>0x92</status>
-                <midino>0x17</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>play_indicator</key>
-                <status>0x93</status>
-                <midino>0x11</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>cue_indicator</key>
-                <status>0x93</status>
-                <midino>0x10</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>sync_enabled</key>
-                <status>0x93</status>
-                <midino>0x0F</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>keylock</key>
-                <status>0x93</status>
-                <midino>0x1B</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>loop_enabled</key>
-                <status>0x93</status>
-                <midino>0x24</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>hotcue_1_status</key>
-                <status>0x93</status>
-                <midino>0x13</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>hotcue_2_status</key>
-                <status>0x93</status>
-                <midino>0x14</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>hotcue_3_status</key>
-                <status>0x93</status>
-                <midino>0x15</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>hotcue_4_status</key>
-                <status>0x93</status>
-                <midino>0x16</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel3]</group>
-                <key>hotcue_5_status</key>
-                <status>0x93</status>
-                <midino>0x17</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>play_indicator</key>
-                <status>0x94</status>
-                <midino>0x11</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>cue_indicator</key>
-                <status>0x94</status>
-                <midino>0x10</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>sync_enabled</key>
-                <status>0x94</status>
-                <midino>0x0F</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>keylock</key>
-                <status>0x94</status>
-                <midino>0x1B</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>loop_enabled</key>
-                <status>0x94</status>
-                <midino>0x24</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>hotcue_1_status</key>
-                <status>0x94</status>
-                <midino>0x13</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>hotcue_2_status</key>
-                <status>0x94</status>
-                <midino>0x14</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>hotcue_3_status</key>
-                <status>0x94</status>
-                <midino>0x15</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>hotcue_4_status</key>
-                <status>0x94</status>
-                <midino>0x16</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[Channel4]</group>
-                <key>hotcue_5_status</key>
-                <status>0x94</status>
-                <midino>0x17</midino>
+                <group>[EffectRack1_EffectUnit2]</group>
+                <key>group_[Master]_enable</key>
+                <status>0xB0</status>
+                <midino>0x4D</midino>
                 <on>0x7F</on>
                 <off>0x00</off>
             </output>

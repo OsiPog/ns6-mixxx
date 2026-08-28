@@ -66,6 +66,48 @@ FX_UNITS = {  # FX unit -> (on/off note, mix msb CC, select CC, select press not
 }
 
 
+# Panel-wide LEDs, channel 1. Recorded from the hardware.
+GLOBAL_LEDS = {
+    "crates": 0x03,
+    "prepare": 0x04,
+    "files": 0x05,
+    "fx1": 0x17,       # FX A on/off
+    "fx2": 0x2E,       # FX B on/off
+    "layer_a": 0x11,   # lit when the left deck is on layer 3
+    "layer_b": 0x28,   # lit when the right deck is on layer 4
+    "send_a": 0x44,    # channel 1 FX A; then B, then channel 2 A/B, ...
+    "master_a": 0x4C,
+    "master_b": 0x4D,
+}
+
+# Per-deck LEDs, sent on the deck side's channel: 2 for the left deck, 3 for
+# the right. Driven from script, so this table is here only for reference; the
+# authoritative copy is in Numark-NS6-scripts.js.
+DECK_LEDS = {
+    "sync_enabled": 0x07,
+    "cue_indicator": 0x08,
+    "play_indicator": 0x09,
+    "shift": 0x0A,
+    "hotcue_1": 0x0B,
+    "hotcue_2": 0x0C,
+    "hotcue_3": 0x0D,
+    "hotcue_4": 0x0E,
+    "hotcue_5": 0x0F,
+    "keylock": 0x10,
+    "scratch": 0x12,
+    "loop_enabled": 0x15,
+    "reverse": 0x16,
+    "loop_mode": 0x18,
+    "loop_in": 0x19,
+    "loop_out": 0x1A,
+    "loop_select": 0x1B,
+    "loop_reloop": 0x1C,
+    "pitch_zero": 0x37,
+    "takeover_up": 0x3C,
+    "takeover_down": 0x3D,
+}
+
+
 def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -159,12 +201,14 @@ x.control("[Library]", "GoToItem", 0x90, 0x0A, ["Button"])
 x.control("[AutoDJ]", "add_bottom", 0x90, 0x0D, ["Button"])
 
 x.comment(3, "=== Effects, MIDI channel 1 ===")
+# FX SELECT and FX PARAM are relative encoders, but they cannot use <selectknob/>:
+# that option is an accumulator, and neither control wants one. See NS6.fxSelect.
 for unit, (onoff, mix, sel, sel_press, param) in FX_UNITS.items():
     x.comment(3, f"FX {chr(64 + unit)} maps to EffectUnit{unit}")
     x.control(f"[EffectRack1_EffectUnit{unit}]", "enabled", 0x90, onoff, ["Button"])
     x.wide(f"[EffectRack1_EffectUnit{unit}]", "mix", 0, mix)
-    x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "effect_selector", 0xB0, sel, ["selectknob"])
-    x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "meta", 0xB0, param, ["selectknob"])
+    x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.fxSelect", 0xB0, sel, ["script-binding"])
+    x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.fxParam", 0xB0, param, ["script-binding"])
     if sel_press is not None:
         x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "enabled", 0x90, sel_press, ["Button"])
 x.comment(3, "LAYER. The controller switches channels by itself; script only has to "
@@ -204,22 +248,27 @@ for d in DECKS:
 x.line(2, "</controls>")
 
 x.line(2, "<outputs>")
-x.comment(3, "LEDs. The controller lights a button when it is sent the same note it "
-             "sends, so the output map mirrors the input map.")
-for ch, (_, _, _, _, _, pfl) in STRIPS.items():
-    x.output(f"[Channel{ch}]", "pfl", 0x90, pfl)
+x.comment(3, "LEDs are control change, not note on, and their numbers bear no "
+             "relation to the notes the same buttons send. Recorded from the "
+             "hardware; see docs/recorded-leds.toml.")
+x.comment(3, "Only the panel-wide lights are here. The per-deck ones are driven "
+             "from script, because they are addressed by physical deck side - "
+             "channel 2 is the left deck whichever layer it is on - and Mixxx "
+             "controls are per deck, so something has to route between them.")
 for unit, (onoff, _, _, _, _) in FX_UNITS.items():
-    x.output(f"[EffectRack1_EffectUnit{unit}]", "enabled", 0x90, onoff)
-for d in DECKS:
-    ch = d
-    g = f"[Channel{d}]"
-    x.output(g, "play_indicator", 0x90 | ch, 0x11)
-    x.output(g, "cue_indicator", 0x90 | ch, 0x10)
-    x.output(g, "sync_enabled", 0x90 | ch, 0x0F)
-    x.output(g, "keylock", 0x90 | ch, 0x1B)
-    x.output(g, "loop_enabled", 0x90 | ch, 0x24)
-    for i in range(1, 6):
-        x.output(g, f"hotcue_{i}_status", 0x90 | ch, 0x12 + i)
+    x.output(f"[EffectRack1_EffectUnit{unit}]", "enabled", 0xB0, GLOBAL_LEDS[f"fx{unit}"])
+x.comment(3, "FX SEND, per mixer channel and for the master mix.")
+for ch in STRIPS:
+    x.output(
+        "[EffectRack1_EffectUnit1]", f"group_[Channel{ch}]_enable", 0xB0,
+        GLOBAL_LEDS["send_a"] + (ch - 1) * 2,
+    )
+    x.output(
+        "[EffectRack1_EffectUnit2]", f"group_[Channel{ch}]_enable", 0xB0,
+        GLOBAL_LEDS["send_a"] + (ch - 1) * 2 + 1,
+    )
+x.output("[EffectRack1_EffectUnit1]", "group_[Master]_enable", 0xB0, GLOBAL_LEDS["master_a"])
+x.output("[EffectRack1_EffectUnit2]", "group_[Master]_enable", 0xB0, GLOBAL_LEDS["master_b"])
 x.line(2, "</outputs>")
 
 x.line(1, "</controller>")

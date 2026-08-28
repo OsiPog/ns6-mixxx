@@ -23,10 +23,20 @@ var NS6 = {};
 
 // --- Tuning ------------------------------------------------------------------
 
-// Ticks the platter reports per full revolution. The platter sends a 14-bit
-// absolute position that wraps, so this sets how far a given movement scratches.
-// If scratching feels too fast, raise it; too slow, lower it.
+// Ticks the platter reports per full revolution. This is meant to be the
+// hardware's number rather than a feel setting: the platter sends a 14-bit
+// absolute position that wraps, and the assumption here is that one turn is the
+// whole 14-bit range. That has not been confirmed against the wheel with a
+// counted number of turns - if it is wrong, everything the platter does is off
+// by the same factor, so it is the first thing to check.
 NS6.ticksPerRevolution = 16384;
+
+// Turns of a 33 1/3 record per turn of the platter, while scratching. At 1 the
+// platter behaves as a 12" turntable; the NS6's wheel is roughly half that
+// across, so 1 makes the same gesture at the rim cover half the audio a
+// turntable would, which is what "too slow" feels like. 2 matches the rim
+// travel instead. Raise it to scratch faster.
+NS6.scratchSensitivity = 2;
 
 // Platter RPM the scratch filter assumes, and its response curve. 33 1/3 is the
 // usual choice and matches what the platter is silk-screened for.
@@ -34,9 +44,11 @@ NS6.scratchRpm = 33 + 1 / 3;
 NS6.scratchAlpha = 1.0 / 8;
 NS6.scratchBeta = (1.0 / 8) / 32;
 
-// How far the platter moves the track when not scratching, as a fraction of
-// full pitch range per revolution.
-NS6.bendScale = 0.8;
+// Jog units sent per full revolution when the platter is bending pitch rather
+// than scratching. Mixxx scales this down hard before it reaches the rate - it
+// multiplies by 0.1 and then averages the last 25 readings - so the number has
+// to be large before the bend is felt at all. Raise it to bend harder.
+NS6.bendPerRevolution = 800;
 
 // PITCH RANGE cycles through these, matching the values the button is labelled
 // with on the panel.
@@ -72,8 +84,8 @@ NS6.deckState = function (group) {
 // --- Lifecycle ---------------------------------------------------------------
 
 NS6.init = function () {
-    // Nothing to send: the NS6 lights its own buttons from the notes the
-    // <outputs> section sends, and Mixxx sends those as the controls change.
+    NS6.connectSide("A");
+    NS6.connectSide("B");
 };
 
 NS6.shutdown = function () {
@@ -82,6 +94,20 @@ NS6.shutdown = function () {
             engine.scratchDisable(script.deckFromGroup(group));
         }
     }
+    // Leave the panel dark rather than frozen on the last state.
+    ["A", "B"].forEach(function (name) {
+        var side = NS6.sides[name];
+        NS6.connections[name].forEach(function (c) {
+            c.disconnect();
+        });
+        Object.keys(NS6.deckLeds).forEach(function (key) {
+            NS6.sendLed(side.channel, NS6.deckLeds[key], false);
+        });
+        Object.keys(NS6.stateLeds).forEach(function (key) {
+            NS6.sendLed(side.channel, NS6.stateLeds[key], false);
+        });
+        NS6.sendLed(side.channel, side.indicator, false);
+    });
 };
 
 // --- SHIFT -------------------------------------------------------------------
@@ -115,6 +141,13 @@ NS6.hotcue4 = function (c, ctl, value, s, group) { NS6.hotcue(4, value, group); 
 NS6.hotcue5 = function (c, ctl, value, s, group) { NS6.hotcue(5, value, group); };
 
 // --- Platter -----------------------------------------------------------------
+
+// Ticks a record revolution is worth, which is what engine.scratchEnable wants.
+// Fewer ticks per record revolution means the same gesture covers more audio,
+// so this is where scratchSensitivity does its work.
+NS6.scratchIntervals = function () {
+    return NS6.ticksPerRevolution / NS6.scratchSensitivity;
+};
 
 // The platter reports absolute position as a 14-bit value that wraps, MSB then
 // LSB. Only the LSB completes a reading, so that is where the work happens.
@@ -162,7 +195,7 @@ NS6.platterLsb = function (channel, control, value, status, group) {
 
     // Not scratching: the platter bends pitch, which is what the manual says it
     // does when SCRATCH is off.
-    engine.setValue(group, "jog", delta / NS6.ticksPerRevolution * NS6.bendScale * 100);
+    engine.setValue(group, "jog", delta / NS6.ticksPerRevolution * NS6.bendPerRevolution);
 };
 
 // SCRATCH turns Scratch Mode on and off. The button lights while it is on.
@@ -174,12 +207,12 @@ NS6.scratchMode = function (channel, control, value, status, group) {
     var deck = script.deckFromGroup(group);
     state.scratching = !state.scratching;
     if (state.scratching) {
-        engine.scratchEnable(deck, NS6.ticksPerRevolution, NS6.scratchRpm,
+        engine.scratchEnable(deck, NS6.scratchIntervals(), NS6.scratchRpm,
                              NS6.scratchAlpha, NS6.scratchBeta);
     } else {
         engine.scratchDisable(deck);
     }
-    midi.sendShortMsg(0x90 | (deck - 1), 0x21, state.scratching ? 0x7F : 0x00);
+    NS6.sendLed(NS6.sideOf(deck).channel, NS6.stateLeds.scratch, state.scratching);
 };
 
 // SKIP is a hold, not a toggle: while it is down the platter jumps by beat and
@@ -192,7 +225,7 @@ NS6.skip = function (channel, control, value, status, group) {
         if (state.skipping) {
             engine.scratchDisable(deck);
         } else {
-            engine.scratchEnable(deck, NS6.ticksPerRevolution, NS6.scratchRpm,
+            engine.scratchEnable(deck, NS6.scratchIntervals(), NS6.scratchRpm,
                                  NS6.scratchAlpha, NS6.scratchBeta);
         }
     }
@@ -256,7 +289,7 @@ NS6.loopMode = function (channel, control, value, status, group) {
     var state = NS6.deckState(group);
     state.autoloop = !state.autoloop;
     var deck = script.deckFromGroup(group);
-    midi.sendShortMsg(0x90 | (deck - 1), 0x27, state.autoloop ? 0x7F : 0x00);
+    NS6.sendLed(NS6.sideOf(deck).channel, NS6.stateLeds.loopMode, state.autoloop);
 };
 
 // The four buttons, in panel order. Shift gives the alternate functions the
@@ -297,35 +330,135 @@ NS6.loopButton2 = function (c, ctl, value, s, group) { NS6.loopButton(2, value, 
 NS6.loopButton3 = function (c, ctl, value, s, group) { NS6.loopButton(3, value, group); };
 NS6.loopButton4 = function (c, ctl, value, s, group) { NS6.loopButton(4, value, group); };
 
-// --- LAYER --------------------------------------------------------------
+// --- Effects -----------------------------------------------------------------
 
-// Keys whose LEDs are per-deck, and so go stale when a deck side switches
-// channel. Mixxx has no idea a layer flipped - the controller just starts
-// talking on a different channel - so the lights have to be pushed again.
-NS6.deckOutputs = [
-    "play_indicator",
-    "cue_indicator",
-    "sync_enabled",
-    "keylock",
-    "loop_enabled",
-    "hotcue_1_status",
-    "hotcue_2_status",
-    "hotcue_3_status",
-    "hotcue_4_status",
-    "hotcue_5_status",
-];
+// FX SELECT and FX PARAM are relative encoders: 1 for one click clockwise, 127
+// for one anticlockwise. The XML's <selectknob/> option cannot drive them,
+// because it is an accumulator - it writes "current value + click" back to the
+// control. For "effect_selector", which is an encoder that never returns to
+// zero, that means the value drifts away from zero and only its sign is ever
+// read, so the knob soon selects in one direction whichever way it is turned.
+// For "meta", a plain 0..1 knob, one click writes 0 + 1 and pins it at full.
+// Both are handled here instead, where one click means one click.
+
+// Clicks it takes to sweep FX PARAM from nothing to full.
+NS6.fxParamClicks = 32;
+
+// Turn an encoder byte into a signed number of clicks.
+NS6.encoderDelta = function (value) {
+    return value < 64 ? value : value - 128;
+};
+
+NS6.fxSelect = function (channel, control, value, status, group) {
+    var delta = NS6.encoderDelta(value);
+    if (delta === 0) {
+        return;
+    }
+    // next_effect and prev_effect are buttons, so each click is a press and a
+    // release rather than a value to be added to anything.
+    var key = delta > 0 ? "next_effect" : "prev_effect";
+    for (var i = 0; i < Math.abs(delta); i++) {
+        engine.setValue(group, key, 1);
+        engine.setValue(group, key, 0);
+    }
+};
+
+NS6.fxParam = function (channel, control, value, status, group) {
+    var delta = NS6.encoderDelta(value);
+    if (delta === 0) {
+        return;
+    }
+    var meta = engine.getValue(group, "meta") + delta / NS6.fxParamClicks;
+    engine.setValue(group, "meta", Math.max(0, Math.min(1, meta)));
+};
+
+// --- LEDs ------------------------------------------------------------------
+
+// LEDs are control change, and their numbers have nothing to do with the notes
+// the same buttons send. Recorded from the hardware.
+//
+// They are also addressed by *physical deck side*, not by deck: channel 2 is
+// the left deck whatever layer it is on, channel 3 the right. Mixxx controls
+// are per deck, so something has to route between the two - which is why these
+// are here rather than in the mapping's <outputs> section.
+NS6.deckLeds = {
+    sync_enabled: 0x07,
+    cue_indicator: 0x08,
+    play_indicator: 0x09,
+    keylock: 0x10,
+    loop_enabled: 0x15,
+    reverse: 0x16,
+    hotcue_1_status: 0x0B,
+    hotcue_2_status: 0x0C,
+    hotcue_3_status: 0x0D,
+    hotcue_4_status: 0x0E,
+    hotcue_5_status: 0x0F,
+};
+
+// Lights the controller drives from script state rather than from a Mixxx
+// control: the SCRATCH button, the loop MODE button, and the layer indicators.
+NS6.stateLeds = {
+    scratch: 0x12,
+    loopMode: 0x18,
+};
+
+// Which deck each physical side is showing. The LAYER buttons only report that
+// they were pressed, never which way, so this is tracked here and starts where
+// the hardware does.
+NS6.sides = {
+    // side -> { channel, deck, alternate, indicator }
+    A: { channel: 0x01, deck: 1, alternate: 3, indicator: 0x11 },
+    B: { channel: 0x02, deck: 2, alternate: 4, indicator: 0x28 },
+};
+
+NS6.sideOf = function (deck) {
+    return deck === 1 || deck === 3 ? NS6.sides.A : NS6.sides.B;
+};
+
+NS6.sendLed = function (channel, cc, on) {
+    midi.sendShortMsg(0xB0 | channel, cc, on ? 0x7F : 0x00);
+};
+
+// Connections are per side, not per deck: when a side switches layer its
+// connections are torn down and remade against the deck it now shows.
+NS6.connections = { A: [], B: [] };
+
+NS6.connectSide = function (name) {
+    var side = NS6.sides[name];
+    NS6.connections[name].forEach(function (c) {
+        c.disconnect();
+    });
+    NS6.connections[name] = [];
+
+    var group = "[Channel" + side.deck + "]";
+    Object.keys(NS6.deckLeds).forEach(function (key) {
+        var cc = NS6.deckLeds[key];
+        var connection = engine.makeConnection(group, key, function (value) {
+            NS6.sendLed(side.channel, cc, value > 0);
+        });
+        connection.trigger();
+        NS6.connections[name].push(connection);
+    });
+
+    // The indicator is lit when the side is showing its alternate layer.
+    NS6.sendLed(side.channel, side.indicator, side.deck === side.alternate);
+
+    // Script-held state does not come from a Mixxx control, so push it here.
+    var state = NS6.deckState(group);
+    NS6.sendLed(side.channel, NS6.stateLeds.scratch, state.scratching);
+    NS6.sendLed(side.channel, NS6.stateLeds.loopMode, state.autoloop);
+};
 
 // LAYER, on channel 1. Which way it went is not reported, only that it moved,
-// so every deck is refreshed - the ones that did not change simply resend what
-// they were already showing.
+// so the side is flipped between its two decks and everything is rebuilt
+// against the one now showing.
 NS6.layer = function (channel, control, value, status, group) {
     if (value === 0) {
         return;
     }
-    for (var deck = 1; deck <= 4; deck++) {
-        var deckGroup = "[Channel" + deck + "]";
-        for (var i = 0; i < NS6.deckOutputs.length; i++) {
-            engine.trigger(deckGroup, NS6.deckOutputs[i]);
-        }
-    }
+    var name = control === 0x04 ? "A" : "B";
+    var side = NS6.sides[name];
+    var base = name === "A" ? 1 : 2;
+    side.deck = side.deck === base ? side.alternate : base;
+    NS6.connectSide(name);
 };
