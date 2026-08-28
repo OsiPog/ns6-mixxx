@@ -38,11 +38,24 @@ NS6.ticksPerRevolution = 16384;
 // travel instead. Raise it to scratch faster.
 NS6.scratchSensitivity = 2;
 
-// Platter RPM the scratch filter assumes, and its response curve. 33 1/3 is the
-// usual choice and matches what the platter is silk-screened for.
+// Platter RPM the scratch filter assumes. 33 1/3 is the usual choice and matches
+// what the platter is silk-screened for.
 NS6.scratchRpm = 33 + 1 / 3;
-NS6.scratchAlpha = 1.0 / 8;
-NS6.scratchBeta = (1.0 / 8) / 32;
+
+// Alpha and beta turn Mixxx's scratch filter off rather than tune it.
+//
+// The filter is an alpha-beta estimator: alpha is how much it believes each new
+// position, beta how much velocity it carries between them. The usual 1/8 and
+// 1/256 smooth the platter and, more to the point, keep a velocity going after
+// the reports stop - so stopping the wheel by hand leaves the deck coasting
+// down instead of stopping.
+//
+// alpha 1 takes each position exactly as reported. beta 0 removes the velocity
+// term entirely, so nothing is carried between reports and the audio only moves
+// when the platter does. The deck stops when your hand does, and the wheel gets
+// whatever resolution it has rather than an interpolation of it.
+NS6.scratchAlpha = 1.0;
+NS6.scratchBeta = 0.0;
 
 // Jog units sent per full revolution when the platter is bending pitch rather
 // than scratching. Mixxx scales this down hard before it reaches the rate - it
