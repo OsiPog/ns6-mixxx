@@ -71,18 +71,33 @@ transmit on a different MIDI channel, and all four channels are mapped.
 
 ## Things you may want to change
 
-At the top of `Numark-NS6-scripts.js`:
+In **Preferences → Controllers → Numark NS6**, so the platter can be dialled in
+with the wheel in your hand:
 
-- `scratchSensitivity` — how much audio the platter covers per turn while
-  scratching, in turns of a 33 1/3 record. Raise it to scratch faster.
-- `bendPerRevolution` — how hard the platter bends pitch when SCRATCH is off.
-  Mixxx scales the jog control down a long way, so this number is large.
+- **Scratch sensitivity** (`scratchSensitivity`) — how much audio the platter
+  covers per turn while scratching, in turns of a 33 1/3 record. Raise it to
+  scratch faster.
+- **Pitch bend per revolution** (`bendPerRevolution`) — how hard the platter
+  bends pitch when SCRATCH is off. Mixxx scales the jog control down a long way,
+  so this number is large.
+- **Scratch smoothing** (`scratchAlpha`) — how much of each reported platter
+  position is believed. 1 is none: the audio moves exactly as the wheel does and
+  stops dead when your hand does. Lower it only if the platter's own resolution
+  makes slow moves sound stepped.
+- **Platter ticks per revolution** (`ticksPerRevolution`) — the platter's own
+  resolution, not a feel setting. It is assumed to be the full 14-bit range and
+  **has not been checked against a counted number of turns**; if it is wrong,
+  everything the platter does is off by the same factor. `ns6 jog` in the
+  [driver](https://github.com/OsiPog/ns6-rs) measures it. Do that before
+  reaching for the two settings above.
+
+Still constants at the top of `Numark-NS6-scripts.js`:
+
 - `beatsPerRevolution` — how far the platter jumps while SKIP is held.
 - `fxParamClicks` — clicks to sweep FX PARAM from nothing to full.
-- `ticksPerRevolution` — the platter's own resolution, not a feel setting. It
-  is assumed to be the full 14-bit range and **has not been checked against a
-  counted number of turns**; if it is wrong, everything the platter does is off
-  by the same factor. Measure it before reaching for the two settings above.
+- `scratchBeta` — deliberately zero. It is how much velocity the scratch filter
+  carries between platter reports, which is exactly what makes a stopped wheel
+  keep coasting.
 
 In `Numark NS6.midi.xml`, the pitch faders carry `<invert/>`. If yours run
 backwards, take it out — DJ software disagrees about which end of a pitch fader
