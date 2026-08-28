@@ -198,7 +198,7 @@ x.comment(3, "CRATES / PREPARE / FILES have no direct Mixxx equivalent; they mov
 x.control("[Library]", "MoveFocusBackward", 0x90, 0x0B, ["Button"])
 x.control("[Library]", "MoveFocusForward", 0x90, 0x09, ["Button"])
 x.control("[Library]", "GoToItem", 0x90, 0x0A, ["Button"])
-x.control("[AutoDJ]", "add_bottom", 0x90, 0x0D, ["Button"])
+x.control("[Library]", "AutoDjAddBottom", 0x90, 0x0D, ["Button"])
 
 x.comment(3, "=== Effects, MIDI channel 1 ===")
 # FX SELECT and FX PARAM are relative encoders, but they cannot use <selectknob/>:

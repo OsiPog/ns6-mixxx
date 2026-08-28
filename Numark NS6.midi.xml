@@ -512,8 +512,8 @@
                 </options>
             </control>
             <control>
-                <group>[AutoDJ]</group>
-                <key>add_bottom</key>
+                <group>[Library]</group>
+                <key>AutoDjAddBottom</key>
                 <status>0x90</status>
                 <midino>0x0D</midino>
                 <options>
