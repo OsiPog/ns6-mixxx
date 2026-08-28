@@ -54,6 +54,13 @@ Effects: both units — on/off, wet/dry, effect select and parameter.
 
 Navigation: scroll, back/forward, prepare, files, crates, view, and LOAD A/B.
 
+**The loop section has two modes**, as on the hardware: MODE switches the four
+numbered buttons between Manual (IN, OUT, SELECT, RELOOP) and Autoloop (1, 2, 4
+and 8 beats). The MODE button's own light shows which you are in. Note that LOOP
+ON/OFF does nothing until a loop exists — that is the hardware's behaviour, not
+a gap in the mapping — so make one with IN and OUT, or with a numbered button in
+Autoloop mode, first. Autoloop needs the track to have a beatgrid.
+
 **SHIFT** is the DELETE CUE / SHIFT button, as on the panel. Held, it turns hot
 cues into hot cue *deletes* (the NS6 cannot overwrite a cue point without
 clearing it first), REVERSE into BLEEP, and the loop buttons into loop rolls or

@@ -123,11 +123,11 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>pfl</key>
+                <key>NS6.pfl</key>
                 <status>0x90</status>
                 <midino>0x31</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- mixer channel 2 -->
@@ -223,11 +223,11 @@
             </control>
             <control>
                 <group>[Channel2]</group>
-                <key>pfl</key>
+                <key>NS6.pfl</key>
                 <status>0x90</status>
                 <midino>0x32</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- mixer channel 3 -->
@@ -323,11 +323,11 @@
             </control>
             <control>
                 <group>[Channel3]</group>
-                <key>pfl</key>
+                <key>NS6.pfl</key>
                 <status>0x90</status>
                 <midino>0x33</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- mixer channel 4 -->
@@ -423,11 +423,11 @@
             </control>
             <control>
                 <group>[Channel4]</group>
-                <key>pfl</key>
+                <key>NS6.pfl</key>
                 <status>0x90</status>
                 <midino>0x34</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- master and booth. 7-bit absolute knobs, not encoders. -->
@@ -524,11 +524,11 @@
             <!-- FX A maps to EffectUnit1 -->
             <control>
                 <group>[EffectRack1_EffectUnit1]</group>
-                <key>enabled</key>
+                <key>NS6.toggleEnabled</key>
                 <status>0x90</status>
                 <midino>0x2D</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
@@ -569,21 +569,21 @@
             </control>
             <control>
                 <group>[EffectRack1_EffectUnit1_Effect1]</group>
-                <key>enabled</key>
+                <key>NS6.toggleEnabled</key>
                 <status>0x90</status>
                 <midino>0x2E</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- FX B maps to EffectUnit2 -->
             <control>
                 <group>[EffectRack1_EffectUnit2]</group>
-                <key>enabled</key>
+                <key>NS6.toggleEnabled</key>
                 <status>0x90</status>
                 <midino>0x2F</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
@@ -644,20 +644,20 @@
             <!-- FX SEND to the master mix, below the MASTER VOLUME knob. -->
             <control>
                 <group>[EffectRack1_EffectUnit1]</group>
-                <key>group_[Master]_enable</key>
+                <key>NS6.masterSendA</key>
                 <status>0x90</status>
                 <midino>0x45</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[EffectRack1_EffectUnit2]</group>
-                <key>group_[Master]_enable</key>
+                <key>NS6.masterSendB</key>
                 <status>0x90</status>
                 <midino>0x46</midino>
                 <options>
-                    <Button/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- === Deck 1 - MIDI channel 2 === -->
@@ -760,15 +760,6 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>keylock</key>
-                <status>0x91</status>
-                <midino>0x1B</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>bpm_tap</key>
                 <status>0x91</status>
                 <midino>0x1E</midino>
@@ -799,15 +790,6 @@
                 <key>loop_double</key>
                 <status>0x91</status>
                 <midino>0x23</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>reloop_toggle</key>
-                <status>0x91</status>
-                <midino>0x24</midino>
                 <options>
                     <Button/>
                 </options>
@@ -895,6 +877,15 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.keylock</key>
+                <status>0x91</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.reverse</key>
                 <status>0x91</status>
                 <midino>0x1C</midino>
@@ -925,6 +916,15 @@
                 <key>NS6.scratchMode</key>
                 <status>0x91</status>
                 <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x91</status>
+                <midino>0x24</midino>
                 <options>
                     <script-binding/>
                 </options>
@@ -1094,15 +1094,6 @@
             </control>
             <control>
                 <group>[Channel2]</group>
-                <key>keylock</key>
-                <status>0x92</status>
-                <midino>0x1B</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel2]</group>
                 <key>bpm_tap</key>
                 <status>0x92</status>
                 <midino>0x1E</midino>
@@ -1133,15 +1124,6 @@
                 <key>loop_double</key>
                 <status>0x92</status>
                 <midino>0x23</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel2]</group>
-                <key>reloop_toggle</key>
-                <status>0x92</status>
-                <midino>0x24</midino>
                 <options>
                     <Button/>
                 </options>
@@ -1229,6 +1211,15 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.keylock</key>
+                <status>0x92</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.reverse</key>
                 <status>0x92</status>
                 <midino>0x1C</midino>
@@ -1259,6 +1250,15 @@
                 <key>NS6.scratchMode</key>
                 <status>0x92</status>
                 <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x92</status>
+                <midino>0x24</midino>
                 <options>
                     <script-binding/>
                 </options>
@@ -1428,15 +1428,6 @@
             </control>
             <control>
                 <group>[Channel3]</group>
-                <key>keylock</key>
-                <status>0x93</status>
-                <midino>0x1B</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel3]</group>
                 <key>bpm_tap</key>
                 <status>0x93</status>
                 <midino>0x1E</midino>
@@ -1467,15 +1458,6 @@
                 <key>loop_double</key>
                 <status>0x93</status>
                 <midino>0x23</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel3]</group>
-                <key>reloop_toggle</key>
-                <status>0x93</status>
-                <midino>0x24</midino>
                 <options>
                     <Button/>
                 </options>
@@ -1563,6 +1545,15 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.keylock</key>
+                <status>0x93</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.reverse</key>
                 <status>0x93</status>
                 <midino>0x1C</midino>
@@ -1593,6 +1584,15 @@
                 <key>NS6.scratchMode</key>
                 <status>0x93</status>
                 <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x93</status>
+                <midino>0x24</midino>
                 <options>
                     <script-binding/>
                 </options>
@@ -1762,15 +1762,6 @@
             </control>
             <control>
                 <group>[Channel4]</group>
-                <key>keylock</key>
-                <status>0x94</status>
-                <midino>0x1B</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel4]</group>
                 <key>bpm_tap</key>
                 <status>0x94</status>
                 <midino>0x1E</midino>
@@ -1801,15 +1792,6 @@
                 <key>loop_double</key>
                 <status>0x94</status>
                 <midino>0x23</midino>
-                <options>
-                    <Button/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel4]</group>
-                <key>reloop_toggle</key>
-                <status>0x94</status>
-                <midino>0x24</midino>
                 <options>
                     <Button/>
                 </options>
@@ -1897,6 +1879,15 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.keylock</key>
+                <status>0x94</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.reverse</key>
                 <status>0x94</status>
                 <midino>0x1C</midino>
@@ -1927,6 +1918,15 @@
                 <key>NS6.scratchMode</key>
                 <status>0x94</status>
                 <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x94</status>
+                <midino>0x24</midino>
                 <options>
                     <script-binding/>
                 </options>

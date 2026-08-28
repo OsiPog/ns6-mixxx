@@ -119,6 +119,41 @@ NS6.shift = function (channel, control, value, status, group) {
     NS6.deckState(group).shift = value > 0;
 };
 
+// --- Latching buttons --------------------------------------------------------
+
+// A button that latches cannot be mapped straight through in the XML: the
+// <Button> option sets the control to 1 on press and 0 on release, so a full
+// press nets to no change and the button appears to need pressing twice. These
+// act on the press alone and flip whatever the control currently is.
+//
+// One function serves every instance of a control, because Mixxx passes the
+// mapping's <group> in - so the same `pfl` handler covers all four channels.
+NS6.flip = function (group, key, value) {
+    if (value > 0) {
+        engine.setValue(group, key, engine.getValue(group, key) ? 0 : 1);
+    }
+};
+
+NS6.pfl = function (c, ctl, value, s, group) { NS6.flip(group, "pfl", value); };
+NS6.keylock = function (c, ctl, value, s, group) { NS6.flip(group, "keylock", value); };
+NS6.toggleEnabled = function (c, ctl, value, s, group) { NS6.flip(group, "enabled", value); };
+NS6.masterSendA = function (c, ctl, value) {
+    NS6.flip("[EffectRack1_EffectUnit1]", "group_[Master]_enable", value);
+};
+NS6.masterSendB = function (c, ctl, value) {
+    NS6.flip("[EffectRack1_EffectUnit2]", "group_[Master]_enable", value);
+};
+
+// LOOP ON/OFF. The panel legend is explicit that with no loop set this does
+// nothing, so it is not enough on its own to get a loop going - IN and OUT in
+// Manual mode, or the numbered buttons in Autoloop mode, are what create one.
+NS6.loopToggle = function (c, ctl, value, s, group) {
+    if (value === 0) {
+        return;
+    }
+    engine.setValue(group, "reloop_toggle", 1);
+};
+
 // --- Hot cues ----------------------------------------------------------------
 
 NS6.hotcue = function (n, value, group) {

@@ -21,19 +21,22 @@ DECK_BUTTONS = {
     0x11: ("play", ["Button"]),
     0x18: ("rate_temp_down", ["Button"]),
     0x19: ("rate_temp_up", ["Button"]),
-    0x1B: ("keylock", ["Button"]),
     0x1E: ("bpm_tap", ["Button"]),
     0x1F: ("beats_translate_curpos", ["Button"]),
     0x22: ("loop_halve", ["Button"]),
     0x23: ("loop_double", ["Button"]),
-    0x24: ("reloop_toggle", ["Button"]),
     0x25: ("loop_move_1_backward", ["Button"]),
     0x26: ("loop_move_1_forward", ["Button"]),
 }
 
-# Buttons whose behaviour depends on shift or on a mode, so they go to script.
+# Buttons that go to script: their behaviour depends on shift or on a mode, or
+# they latch. A latching control cannot use <Button>, which sets 1 on press and
+# 0 on release - a full press then nets to no change, and the button appears to
+# need pressing twice.
 DECK_SCRIPT_BUTTONS = {
     0x12: "shift",           # DELETE CUE / SHIFT
+    0x1B: "keylock",         # latching: toggled on press only
+    0x24: "loopToggle",      # latching
     0x13: "hotcue1",
     0x14: "hotcue2",
     0x15: "hotcue3",
@@ -181,7 +184,7 @@ for ch, (fader, bass, mid, treble, gain, pfl) in STRIPS.items():
     x.wide(f"[EqualizerRack1_[Channel{ch}]_Effect1]", "parameter2", 0, mid)
     x.wide(f"[EqualizerRack1_[Channel{ch}]_Effect1]", "parameter3", 0, treble)
     x.wide(f"[Channel{ch}]", "pregain", 0, gain)
-    x.control(f"[Channel{ch}]", "pfl", 0x90, pfl, ["Button"])
+    x.control(f"[Channel{ch}]", "NS6.pfl", 0x90, pfl, ["script-binding"])
 
 x.comment(3, "master and booth. 7-bit absolute knobs, not encoders.")
 x.control("[Master]", "gain", 0xB0, 0x43)
@@ -205,12 +208,12 @@ x.comment(3, "=== Effects, MIDI channel 1 ===")
 # that option is an accumulator, and neither control wants one. See NS6.fxSelect.
 for unit, (onoff, mix, sel, sel_press, param) in FX_UNITS.items():
     x.comment(3, f"FX {chr(64 + unit)} maps to EffectUnit{unit}")
-    x.control(f"[EffectRack1_EffectUnit{unit}]", "enabled", 0x90, onoff, ["Button"])
+    x.control(f"[EffectRack1_EffectUnit{unit}]", "NS6.toggleEnabled", 0x90, onoff, ["script-binding"])
     x.wide(f"[EffectRack1_EffectUnit{unit}]", "mix", 0, mix)
     x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.fxSelect", 0xB0, sel, ["script-binding"])
     x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.fxParam", 0xB0, param, ["script-binding"])
     if sel_press is not None:
-        x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "enabled", 0x90, sel_press, ["Button"])
+        x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.toggleEnabled", 0x90, sel_press, ["script-binding"])
 x.comment(3, "LAYER. The controller switches channels by itself; script only has to "
              "refresh the LEDs, which would otherwise show the outgoing deck until "
              "something on the new one happened to change.")
@@ -218,8 +221,8 @@ x.control("[Master]", "NS6.layer", 0x90, 0x04, ["script-binding"])
 x.control("[Master]", "NS6.layer", 0x90, 0x05, ["script-binding"])
 
 x.comment(3, "FX SEND to the master mix, below the MASTER VOLUME knob.")
-x.control("[EffectRack1_EffectUnit1]", "group_[Master]_enable", 0x90, 0x45, ["Button"])
-x.control("[EffectRack1_EffectUnit2]", "group_[Master]_enable", 0x90, 0x46, ["Button"])
+x.control("[EffectRack1_EffectUnit1]", "NS6.masterSendA", 0x90, 0x45, ["script-binding"])
+x.control("[EffectRack1_EffectUnit2]", "NS6.masterSendB", 0x90, 0x46, ["script-binding"])
 
 for d in DECKS:
     ch = d  # deck N is MIDI channel N (0-indexed), i.e. status 0x9N / 0xBN
