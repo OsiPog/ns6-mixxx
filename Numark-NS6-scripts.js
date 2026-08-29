@@ -21,6 +21,10 @@
 
 var NS6 = {};
 
+// Set true to trace latching buttons into the Mixxx log, for working out why
+// one is not behaving. Off by default: it logs on every press.
+NS6.debug = false;
+
 // --- Tuning ------------------------------------------------------------------
 
 // Ticks the platter reports per full revolution. This is meant to be the
@@ -113,10 +117,18 @@ NS6.applySettings = function () {
     NS6.scratchAlpha = setting("scratchSmoothing", NS6.scratchAlpha);
 };
 
+// Mixxx opens the controller's MIDI output *after* it runs init(), so anything
+// sent from here goes nowhere - the log fills with "not open for output!" and
+// the panel starts blank until something happens to change. Pushing the initial
+// state from a one-shot timer instead lets the output finish opening first.
+NS6.initialLedDelayMs = 500;
+
 NS6.init = function () {
     NS6.applySettings();
-    NS6.connectSide("A");
-    NS6.connectSide("B");
+    engine.beginTimer(NS6.initialLedDelayMs, function () {
+        NS6.connectSide("A");
+        NS6.connectSide("B");
+    }, true);
 };
 
 NS6.shutdown = function () {
@@ -160,6 +172,12 @@ NS6.shift = function (channel, control, value, status, group) {
 // One function serves every instance of a control, because Mixxx passes the
 // mapping's <group> in - so the same `pfl` handler covers all four channels.
 NS6.flip = function (group, key, value) {
+    if (NS6.debug) {
+        console.log(
+            "NS6 flip " + group + " " + key + " value=" + value +
+            " before=" + engine.getValue(group, key)
+        );
+    }
     if (value > 0) {
         engine.setValue(group, key, engine.getValue(group, key) ? 0 : 1);
     }

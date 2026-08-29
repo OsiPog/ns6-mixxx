@@ -129,6 +129,13 @@ device off the USB bus** and needs a power cycle. See
 
 ## Gaps
 
+The **PFL / headphone-cue buttons have no light**. The LED walk that produced
+[docs/recorded-leds.toml](docs/recorded-leds.toml) never identified one, so
+there is no number to send. Cueing does toggle correctly on a single press —
+that is confirmed against a running Mixxx — but the button stays dark, so judge
+it by what is in your headphones rather than by the panel until this is found.
+
+
 A handful of controls were never captured and so are not mapped: the eight
 per-channel FX SEND buttons, the FX B select knob's press, the scroll knob's
 press, and three unidentified channel-1 CCs. They are listed in
