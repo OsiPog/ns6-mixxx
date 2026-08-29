@@ -183,7 +183,23 @@ NS6.flip = function (group, key, value) {
     }
 };
 
-NS6.pfl = function (c, ctl, value, s, group) { NS6.flip(group, "pfl", value); };
+// PFL is not like the other buttons: it latches in hardware and drives its own
+// light, which no message we send can change. Because the device owns that
+// state, it reports *both* edges - note-on when it latches on, note-off when it
+// latches off, one message per press. Timestamps settle it: consecutive
+// messages arrive a second and a half apart, at the pressing cadence, not as
+// press-and-release pairs milliseconds apart.
+//
+// So this follows the button rather than toggling: Mixxx ends up showing what
+// the lit button already claims. Toggling here would discard every note-off and
+// need two presses per change.
+//
+// The distinction is worth stating, because both kinds sit on this panel: a
+// button whose LED we can drive is momentary and its state is ours to keep
+// (see NS6.flip); a button whose LED we cannot drive keeps its own.
+NS6.pfl = function (c, ctl, value, s, group) {
+    engine.setValue(group, "pfl", value > 0 ? 1 : 0);
+};
 NS6.keylock = function (c, ctl, value, s, group) { NS6.flip(group, "keylock", value); };
 NS6.toggleEnabled = function (c, ctl, value, s, group) { NS6.flip(group, "enabled", value); };
 NS6.masterSendA = function (c, ctl, value) {

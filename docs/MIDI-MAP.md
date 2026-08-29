@@ -163,6 +163,29 @@ has to be sent to channel 2.
 Panel-wide lights respond on *any* channel, which is why a sweep shows them
 repeatedly.
 
+### Two kinds of button
+
+The panel mixes momentary and latching buttons, and they need mapping
+differently.
+
+**Momentary** — play, cue, sync, hot cues, the loop buttons and so on. Note-on
+when pressed, note-off when released; hold one and the note-off comes only when
+you let go. Software owns whatever state they represent, and their LEDs are
+host-driven.
+
+**Latching** — the four PFL / headphone-cue buttons. These keep their own state
+and drive their own lights, which nothing the host sends can change. Each press
+emits exactly one message, alternating note-on and note-off. Software should
+*follow* them rather than toggle, or half the presses are discarded.
+
+The two are easy to confuse, because a latching button pressed twice looks like
+one momentary press-and-release. Timing separates them: a real press-and-release
+is milliseconds apart, two presses are as far apart as the person pressing.
+
+A useful shortcut: if a button's LED appears in the map below, it is host-driven
+and the button is momentary. If it does not, the device owns both the light and
+the state.
+
 ### Per deck — channel 2 (left) or 3 (right)
 
 | CC | Dec | Lights |

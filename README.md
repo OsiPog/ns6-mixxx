@@ -129,11 +129,10 @@ device off the USB bus** and needs a power cycle. See
 
 ## Gaps
 
-The **PFL / headphone-cue buttons have no light**. The LED walk that produced
-[docs/recorded-leds.toml](docs/recorded-leds.toml) never identified one, so
-there is no number to send. Cueing does toggle correctly on a single press —
-that is confirmed against a running Mixxx — but the button stays dark, so judge
-it by what is in your headphones rather than by the panel until this is found.
+The **PFL / headphone-cue buttons light themselves**. They latch in hardware and
+no message reaches their LEDs — every control change and every note, on all five
+channels, was tried. So the mapping follows the button instead of driving it,
+and the light is always right by construction.
 
 
 A handful of controls were never captured and so are not mapped: the eight
