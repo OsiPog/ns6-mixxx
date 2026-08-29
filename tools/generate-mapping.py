@@ -232,7 +232,13 @@ for ch, (fader, bass, mid, treble, gain, pfl) in STRIPS.items():
     x.wide(f"[EqualizerRack1_[Channel{ch}]_Effect1]", "parameter2", 0, mid)
     x.wide(f"[EqualizerRack1_[Channel{ch}]_Effect1]", "parameter3", 0, treble)
     x.wide(f"[Channel{ch}]", "pregain", 0, gain)
+    # PFL latches in hardware and reports both edges, so the note-off matters
+    # as much as the note-on - it is what turns cueing back off. Mixxx matches
+    # on the status byte, and a release arrives as 0x80, so it needs its own
+    # entry; with only 0x90 declared the release is silently dropped and cueing
+    # can be switched on but never off.
     x.control(f"[Channel{ch}]", "NS6.pfl", 0x90, pfl, ["script-binding"])
+    x.control(f"[Channel{ch}]", "NS6.pfl", 0x80, pfl, ["script-binding"])
 
 x.comment(3, "master and booth. 7-bit absolute knobs, not encoders.")
 x.control("[Master]", "gain", 0xB0, 0x43)
