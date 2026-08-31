@@ -592,9 +592,9 @@ NS6.navLeds = [0x03, 0x04, 0x05];
 // they were pressed, never which way, so this is tracked here and starts where
 // the hardware does.
 NS6.sides = {
-    // side -> { channel, deck, alternate, indicator }
-    A: { channel: 0x01, deck: 1, alternate: 3, indicator: 0x11 },
-    B: { channel: 0x02, deck: 2, alternate: 4, indicator: 0x28 },
+    // side -> { name, channel, deck, alternate, indicator }
+    A: { name: "A", channel: 0x01, deck: 1, alternate: 3, indicator: 0x11 },
+    B: { name: "B", channel: 0x02, deck: 2, alternate: 4, indicator: 0x28 },
 };
 
 NS6.sideOf = function (deck) {
@@ -749,9 +749,12 @@ NS6.drawPanel = function (on) {
     });
 };
 
-// LAYER, on channel 1. Which way it went is not reported, only that it moved,
-// so the side is flipped between its two decks and everything is rebuilt
-// against the one now showing.
+// LAYER, on channel 1. The press says which side moved but not which way, so
+// this flips that side and rebuilds against the deck now showing.
+//
+// The flip is a guess, and it is only here so the panel reacts the instant the
+// button is hit. What makes it right is NS6.observeDeck below, which corrects it
+// from the traffic a moment later.
 NS6.layer = function (channel, control, value, status, group) {
     if (value === 0) {
         return;
@@ -762,3 +765,48 @@ NS6.layer = function (channel, control, value, status, group) {
     side.deck = side.deck === base ? side.alternate : base;
     NS6.connectSide(name);
 };
+
+// Which deck a side is showing, taken from the traffic rather than tracked.
+//
+// The panel never states it: the LAYER buttons report that they were pressed
+// and not which way. But a deck side transmits on the channel of the deck it is
+// currently showing - that is what the LAYER button changes - so every message
+// from that side names the deck it came from. The platters report continuously,
+// touched or not, so the answer arrives on its own within milliseconds and
+// keeps arriving.
+//
+// Tracking it instead means starting from an assumption. Mixxx launched against
+// hardware already switched to layers 3 and 4 would have every deck light on
+// the wrong side, and no press of anything would ever put it right, because the
+// toggle and the hardware would stay exactly one flip apart. Observing cannot
+// drift: the worst case is being right one platter report late.
+//
+// Only handlers bound to a deck's own MIDI channel may call this. NS6.pfl must
+// not: it is bound to [Channel1..4] as mixer strips, all on channel 1, so a PFL
+// press would otherwise claim its strip number as a layer.
+NS6.observeDeck = function (group) {
+    var deck = script.deckFromGroup(group);
+    var side = NS6.sideOf(deck);
+    if (side.deck === deck) {
+        return;
+    }
+    side.deck = deck;
+    NS6.connectSide(side.name);
+};
+
+// Wrapping rather than a call at the top of each: these are every handler bound
+// to a deck's own channel, and the list is the point - it is what says which
+// handlers carry layer information and which, like NS6.pfl, do not.
+[
+    "platterMsb", "platterLsb", "pitchMsb", "pitchLsb", "stripSearch",
+    "shift", "keylock", "pitchRange", "reverse", "skip", "beatgridAdjust",
+    "scratchMode", "loopMode", "loopToggle",
+    "hotcue1", "hotcue2", "hotcue3", "hotcue4", "hotcue5",
+    "loopButton1", "loopButton2", "loopButton3", "loopButton4",
+].forEach(function (name) {
+    var handler = NS6[name];
+    NS6[name] = function (channel, control, value, status, group) {
+        NS6.observeDeck(group);
+        return handler(channel, control, value, status, group);
+    };
+});

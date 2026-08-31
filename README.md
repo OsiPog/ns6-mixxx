@@ -122,8 +122,14 @@ Recorded from the hardware, not assumed. They turned out to be Control Change
 rather than note on, with numbers unrelated to the input notes, and addressed by
 physical deck side rather than by deck — so the left deck's lights are on
 channel 2 whichever layer it is showing. The mapping routes between that and
-Mixxx's per-deck controls, and re-points a side's lights when its LAYER button
-is pressed.
+Mixxx's per-deck controls.
+
+Which deck a side is showing is **observed rather than tracked**. The LAYER
+buttons report that they were pressed but not which way, so a mapping that
+toggles is wrong from the moment Mixxx starts against hardware already switched
+over, and stays wrong. But a deck side transmits on the channel of the deck it is
+showing, and the platters report continuously whether or not anyone is touching
+them, so the traffic says which deck it is, over and over. See `NS6.observeDeck`.
 
 Every recorded light is driven. Besides the obvious ones, that means the
 pitch fader's centre detent and its two soft-takeover arrows, the four LOOP
