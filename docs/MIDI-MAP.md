@@ -208,8 +208,8 @@ Both statuses have to be declared, pointing at the same handler.
 | 0x18 | 24 | LOOP MODE |
 | 0x19–0x1C | 25–28 | LOOP IN / OUT / SELECT / RELOOP |
 | 0x37 | 55 | Pitch fader 0% |
-| 0x3C | 60 | Pitch takeover, up arrow |
-| 0x3D | 61 | Pitch takeover, down arrow |
+| 0x3C | 60 | Pitch takeover, up arrow — the **−%** end of the fader's travel |
+| 0x3D | 61 | Pitch takeover, down arrow — the **+%** end |
 
 ### Panel-wide — channel 1
 

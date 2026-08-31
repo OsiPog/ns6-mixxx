@@ -93,6 +93,11 @@ NS6.deckState = function (group) {
             platterMsb: 0,
             lastPosition: null,
             pitchRangeIndex: 0,
+            // Where the pitch fader physically is. Null until it first
+            // reports, because until then nothing knows: the fader is not a
+            // control that can be asked, only one that speaks when moved.
+            pitchMsb: 0,
+            pitchRaw: null,
         };
     }
     return NS6.decks[group];
@@ -125,9 +130,16 @@ NS6.initialLedDelayMs = 500;
 
 NS6.init = function () {
     NS6.applySettings();
+    // The pitch fader is written from script rather than bound in the XML, so
+    // ask for the soft takeover the <soft-takeover/> option used to give it.
+    // Without this a fader left somewhere else snaps the rate on first touch.
+    [1, 2, 3, 4].forEach(function (d) {
+        engine.softTakeover("[Channel" + d + "]", "rate", true);
+    });
     engine.beginTimer(NS6.initialLedDelayMs, function () {
         NS6.connectSide("A");
         NS6.connectSide("B");
+        NS6.drawPanel(true);
     }, true);
 };
 
@@ -149,8 +161,15 @@ NS6.shutdown = function () {
         Object.keys(NS6.stateLeds).forEach(function (key) {
             NS6.sendLed(side.channel, NS6.stateLeds[key], false);
         });
+        NS6.loopLeds.forEach(function (cc) {
+            NS6.sendLed(side.channel, cc, false);
+        });
+        Object.keys(NS6.pitchLeds).forEach(function (key) {
+            NS6.sendLed(side.channel, NS6.pitchLeds[key], false);
+        });
         NS6.sendLed(side.channel, side.indicator, false);
     });
+    NS6.drawPanel(false);
 };
 
 // --- SHIFT -------------------------------------------------------------------
@@ -160,6 +179,10 @@ NS6.shutdown = function () {
 // what shift+hotcue does below.
 NS6.shift = function (channel, control, value, status, group) {
     NS6.deckState(group).shift = value > 0;
+    var side = NS6.ledSideFor(group);
+    if (side !== null) {
+        NS6.sendLed(side.channel, NS6.stateLeds.shift, value > 0);
+    }
 };
 
 // --- Latching buttons --------------------------------------------------------
@@ -343,6 +366,46 @@ NS6.stripSearch = function (channel, control, value, status, group) {
 
 // --- Pitch -------------------------------------------------------------------
 
+// The pitch fader is 14-bit and absolute, and it is handled here rather than
+// bound straight to "rate" in the XML for one reason: the two arrows beside it
+// are the hardware's soft-takeover display, and drawing them needs to know
+// where the *fader* is, not where the deck's rate is. A plain <control> binding
+// never shows anyone the fader's position.
+//
+// Mixxx still does the takeover itself. engine.softTakeover applies to values
+// script writes exactly as it does to a mapped control, so the behaviour is the
+// same as the <soft-takeover/> option this replaces; see NS6.init.
+
+// Fader position as a rate, -1 to 1. Inverted, which is what <invert/> did in
+// the XML before this moved into script: DJ software disagrees about which end
+// of a pitch fader is "faster". If yours runs backwards, drop the minus sign
+// - that is, return 2 * raw / 16383 - 1.
+NS6.rateFromFader = function (raw) {
+    return 1 - 2 * raw / 16383;
+};
+
+// How close to 0% counts as centred, for the detent light. In rate units, so a
+// fraction of whatever PITCH RANGE is set to: at +/-8% this is a fifth of a
+// percent either side.
+NS6.rateZeroWindow = 3 / 128;
+
+// How far apart the fader and the deck have to be before an arrow comes on.
+// The same order as Mixxx's own soft-takeover threshold, so the arrows go out at
+// about the moment the fader takes hold rather than well before or after.
+NS6.takeoverSlack = 2 * 3 / 128;
+
+NS6.pitchMsb = function (channel, control, value, status, group) {
+    NS6.deckState(group).pitchMsb = value;
+};
+
+// Only the LSB completes a reading, as with the platter.
+NS6.pitchLsb = function (channel, control, value, status, group) {
+    var state = NS6.deckState(group);
+    state.pitchRaw = (state.pitchMsb << 7) | value;
+    engine.setValue(group, "rate", NS6.rateFromFader(state.pitchRaw));
+    NS6.updatePitchLeds(group);
+};
+
 // PITCH RANGE steps through +/-8%, 16% and 50%, as labelled.
 NS6.pitchRange = function (channel, control, value, status, group) {
     if (value === 0) {
@@ -390,6 +453,8 @@ NS6.loopMode = function (channel, control, value, status, group) {
     state.autoloop = !state.autoloop;
     var deck = script.deckFromGroup(group);
     NS6.sendLed(NS6.sideOf(deck).channel, NS6.stateLeds.loopMode, state.autoloop);
+    // The four numbered buttons now mean something else, so their lights do too.
+    NS6.updateLoopLeds(group);
 };
 
 // The four buttons, in panel order. Shift gives the alternate functions the
@@ -496,11 +561,32 @@ NS6.deckLeds = {
 };
 
 // Lights the controller drives from script state rather than from a Mixxx
-// control: the SCRATCH button, the loop MODE button, and the layer indicators.
+// control: the SCRATCH button, the loop MODE button, and DELETE CUE / SHIFT,
+// which is held rather than latched and so has no control of its own.
 NS6.stateLeds = {
     scratch: 0x12,
     loopMode: 0x18,
+    shift: 0x0A,
 };
+
+// The four numbered LOOP CONTROL buttons, in panel order. What they light for
+// depends on which mode the section is in, so they go through NS6.updateLoopLeds
+// rather than being connected to one control each.
+NS6.loopLeds = [0x19, 0x1A, 0x1B, 0x1C];
+
+// The pitch fader's three lights: centre detent, and the two takeover arrows.
+NS6.pitchLeds = {
+    zero: 0x37,
+    up: 0x3C,
+    down: 0x3D,
+};
+
+// CRATES, PREPARE and FILES, which answer on any channel. Their buttons move
+// focus in the library and have no state to show, so they are simply lit - an
+// unlit button on this panel reads as a dead one. Set this false for a dark
+// navigation row instead.
+NS6.litNavButtons = true;
+NS6.navLeds = [0x03, 0x04, 0x05];
 
 // Which deck each physical side is showing. The LAYER buttons only report that
 // they were pressed, never which way, so this is tracked here and starts where
@@ -515,9 +601,101 @@ NS6.sideOf = function (deck) {
     return deck === 1 || deck === 3 ? NS6.sides.A : NS6.sides.B;
 };
 
+// The side a deck's lights are on, or null if that deck is not the one its side
+// is currently showing. A background deck's state has nowhere to go: there is
+// no second set of lamps behind the layer button, so writing them would
+// overwrite the deck that is actually on the panel.
+NS6.ledSideFor = function (group) {
+    var deck = script.deckFromGroup(group);
+    var side = NS6.sideOf(deck);
+    return side.deck === deck ? side : null;
+};
+
 NS6.sendLed = function (channel, cc, on) {
     midi.sendShortMsg(0xB0 | channel, cc, on ? 0x7F : 0x00);
 };
+
+// --- Lights that are a function of several controls -------------------------
+
+// The four numbered LOOP CONTROL buttons. MODE changes what they do, so it
+// changes what they light for.
+NS6.updateLoopLeds = function (group) {
+    var side = NS6.ledSideFor(group);
+    if (side === null) {
+        return;
+    }
+    var lit;
+    if (NS6.deckState(group).autoloop) {
+        // The buttons are 1, 2, 4 and 8 beats: light whichever the loop that
+        // exists is the length of.
+        lit = [1, 2, 4, 8].map(function (beats) {
+            return engine.getValue(group, "beatloop_" + beats + "_enabled") > 0;
+        });
+    } else {
+        // Manual. IN and OUT light as each end is placed, so the pair doubles as
+        // a record of how far through setting a loop you are, and RELOOP lights
+        // once there is a loop to return to. SELECT is mapped to loop_exit here
+        // and has no state of its own to show, so it stays dark.
+        var start = engine.getValue(group, "loop_start_position") >= 0;
+        var end = engine.getValue(group, "loop_end_position") >= 0;
+        lit = [start, end, false, start && end];
+    }
+    lit.forEach(function (on, i) {
+        NS6.sendLed(side.channel, NS6.loopLeds[i], on);
+    });
+};
+
+// The pitch fader's lights. The centre detent is just the rate; the arrows are
+// the gap between where the fader is and where it would have to be for the rate
+// the deck is actually at - which is exactly what soft takeover is waiting for.
+NS6.updatePitchLeds = function (group) {
+    var side = NS6.ledSideFor(group);
+    if (side === null) {
+        return;
+    }
+    var rate = engine.getValue(group, "rate");
+    NS6.sendLed(side.channel, NS6.pitchLeds.zero, Math.abs(rate) < NS6.rateZeroWindow);
+
+    var fader = NS6.deckState(group).pitchRaw;
+    if (fader === null) {
+        // The fader has never reported, so nothing is known about the gap. Both
+        // arrows off is the honest answer, not "aligned".
+        NS6.sendLed(side.channel, NS6.pitchLeds.up, false);
+        NS6.sendLed(side.channel, NS6.pitchLeds.down, false);
+        return;
+    }
+    // Both sides of this are rates, not fader positions, which is deliberate:
+    // it keeps the arrows correct even if NS6.rateFromFader's inversion is
+    // changed, because "which way is -%" is a fact about the panel and not
+    // about how the fader is wired.
+    //
+    // Positive means the fader is asking for more speed than the deck has, so
+    // the fader has to come back toward -% for the two to meet.
+    var gap = NS6.rateFromFader(fader) - rate;
+    // The up arrow is the one at the -% end of the fader's travel.
+    NS6.sendLed(side.channel, NS6.pitchLeds.up, gap > NS6.takeoverSlack);
+    NS6.sendLed(side.channel, NS6.pitchLeds.down, gap < -NS6.takeoverSlack);
+};
+
+// Controls to watch for each of those, since neither is one control's value.
+// Listed after the functions because these are plain properties, not
+// declarations, and are not hoisted.
+NS6.derivedLeds = [
+    {
+        keys: ["loop_start_position", "loop_end_position", "loop_enabled",
+               "beatloop_1_enabled", "beatloop_2_enabled",
+               "beatloop_4_enabled", "beatloop_8_enabled"],
+        draw: NS6.updateLoopLeds,
+    },
+    {
+        // rateRange moves the rate under a stationary fader, so it changes the
+        // gap the arrows show just as moving the fader does.
+        keys: ["rate", "rateRange"],
+        draw: NS6.updatePitchLeds,
+    },
+];
+
+// --- Wiring ----------------------------------------------------------------
 
 // Connections are per side, not per deck: when a side switches layer its
 // connections are torn down and remade against the deck it now shows.
@@ -540,6 +718,19 @@ NS6.connectSide = function (name) {
         NS6.connections[name].push(connection);
     });
 
+    // The derived lights are drawn once here and then redrawn whenever any of
+    // the controls they read moves. They are not triggered per connection: one
+    // draw covers all of that group's controls, and triggering each would draw
+    // the same thing several times over.
+    NS6.derivedLeds.forEach(function (led) {
+        led.keys.forEach(function (key) {
+            NS6.connections[name].push(engine.makeConnection(group, key, function () {
+                led.draw(group);
+            }));
+        });
+        led.draw(group);
+    });
+
     // The indicator is lit when the side is showing its alternate layer.
     NS6.sendLed(side.channel, side.indicator, side.deck === side.alternate);
 
@@ -547,6 +738,15 @@ NS6.connectSide = function (name) {
     var state = NS6.deckState(group);
     NS6.sendLed(side.channel, NS6.stateLeds.scratch, state.scratching);
     NS6.sendLed(side.channel, NS6.stateLeds.loopMode, state.autoloop);
+    NS6.sendLed(side.channel, NS6.stateLeds.shift, state.shift);
+};
+
+// The panel-wide lights, which are not per deck and so are not part of either
+// side. Sent on channel 1; the recording found they answer on any channel.
+NS6.drawPanel = function (on) {
+    NS6.navLeds.forEach(function (cc) {
+        NS6.sendLed(0x00, cc, on && NS6.litNavButtons);
+    });
 };
 
 // LAYER, on channel 1. Which way it went is not reported, only that it moved,

@@ -741,27 +741,23 @@
                     <script-binding/>
                 </options>
             </control>
-            <!-- PITCH FADER. If it feels backwards, swap &lt;invert/&gt; in or out here. -->
+            <!-- PITCH FADER: 14-bit absolute. Through script rather than bound straight to `rate`, because the two arrows beside it show the gap between the fader and the deck's rate, and only script gets told where the fader is. Mixxx still does the takeover; see NS6.init. Inversion moved with it, into NS6.rateFromFader. -->
             <control>
                 <group>[Channel1]</group>
-                <key>rate</key>
+                <key>NS6.pitchMsb</key>
                 <status>0xB1</status>
                 <midino>0x01</midino>
                 <options>
-                    <fourteen-bit-msb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>rate</key>
+                <key>NS6.pitchLsb</key>
                 <status>0xB1</status>
                 <midino>0x21</midino>
                 <options>
-                    <fourteen-bit-lsb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- STRIP SEARCH: absolute position along the track. -->
@@ -1054,7 +1050,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The per-channel FX SEND buttons are not mapped: their note numbers were never captured. Only the two master FX SEND buttons, and the scroll knob's press, are missing from this mapping for the same reason. -->
+            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
             <!-- === Deck 2 - MIDI channel 3 === -->
             <!-- PLATTER: 14-bit absolute position that wraps, so the delta has to be computed in script. -->
             <control>
@@ -1075,27 +1071,23 @@
                     <script-binding/>
                 </options>
             </control>
-            <!-- PITCH FADER. If it feels backwards, swap &lt;invert/&gt; in or out here. -->
+            <!-- PITCH FADER: 14-bit absolute. Through script rather than bound straight to `rate`, because the two arrows beside it show the gap between the fader and the deck's rate, and only script gets told where the fader is. Mixxx still does the takeover; see NS6.init. Inversion moved with it, into NS6.rateFromFader. -->
             <control>
                 <group>[Channel2]</group>
-                <key>rate</key>
+                <key>NS6.pitchMsb</key>
                 <status>0xB2</status>
                 <midino>0x01</midino>
                 <options>
-                    <fourteen-bit-msb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel2]</group>
-                <key>rate</key>
+                <key>NS6.pitchLsb</key>
                 <status>0xB2</status>
                 <midino>0x21</midino>
                 <options>
-                    <fourteen-bit-lsb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- STRIP SEARCH: absolute position along the track. -->
@@ -1388,7 +1380,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The per-channel FX SEND buttons are not mapped: their note numbers were never captured. Only the two master FX SEND buttons, and the scroll knob's press, are missing from this mapping for the same reason. -->
+            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
             <!-- === Deck 3 - MIDI channel 4 === -->
             <!-- PLATTER: 14-bit absolute position that wraps, so the delta has to be computed in script. -->
             <control>
@@ -1409,27 +1401,23 @@
                     <script-binding/>
                 </options>
             </control>
-            <!-- PITCH FADER. If it feels backwards, swap &lt;invert/&gt; in or out here. -->
+            <!-- PITCH FADER: 14-bit absolute. Through script rather than bound straight to `rate`, because the two arrows beside it show the gap between the fader and the deck's rate, and only script gets told where the fader is. Mixxx still does the takeover; see NS6.init. Inversion moved with it, into NS6.rateFromFader. -->
             <control>
                 <group>[Channel3]</group>
-                <key>rate</key>
+                <key>NS6.pitchMsb</key>
                 <status>0xB3</status>
                 <midino>0x01</midino>
                 <options>
-                    <fourteen-bit-msb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel3]</group>
-                <key>rate</key>
+                <key>NS6.pitchLsb</key>
                 <status>0xB3</status>
                 <midino>0x21</midino>
                 <options>
-                    <fourteen-bit-lsb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- STRIP SEARCH: absolute position along the track. -->
@@ -1722,7 +1710,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The per-channel FX SEND buttons are not mapped: their note numbers were never captured. Only the two master FX SEND buttons, and the scroll knob's press, are missing from this mapping for the same reason. -->
+            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
             <!-- === Deck 4 - MIDI channel 5 === -->
             <!-- PLATTER: 14-bit absolute position that wraps, so the delta has to be computed in script. -->
             <control>
@@ -1743,27 +1731,23 @@
                     <script-binding/>
                 </options>
             </control>
-            <!-- PITCH FADER. If it feels backwards, swap &lt;invert/&gt; in or out here. -->
+            <!-- PITCH FADER: 14-bit absolute. Through script rather than bound straight to `rate`, because the two arrows beside it show the gap between the fader and the deck's rate, and only script gets told where the fader is. Mixxx still does the takeover; see NS6.init. Inversion moved with it, into NS6.rateFromFader. -->
             <control>
                 <group>[Channel4]</group>
-                <key>rate</key>
+                <key>NS6.pitchMsb</key>
                 <status>0xB4</status>
                 <midino>0x01</midino>
                 <options>
-                    <fourteen-bit-msb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel4]</group>
-                <key>rate</key>
+                <key>NS6.pitchLsb</key>
                 <status>0xB4</status>
                 <midino>0x21</midino>
                 <options>
-                    <fourteen-bit-lsb/>
-                    <soft-takeover/>
-                    <invert/>
+                    <script-binding/>
                 </options>
             </control>
             <!-- STRIP SEARCH: absolute position along the track. -->
@@ -2056,7 +2040,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The per-channel FX SEND buttons are not mapped: their note numbers were never captured. Only the two master FX SEND buttons, and the scroll knob's press, are missing from this mapping for the same reason. -->
+            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
         </controls>
         <outputs>
             <!-- LEDs are control change, not note on, and their numbers bear no relation to the notes the same buttons send. Recorded from the hardware; see docs/recorded-leds.toml. -->

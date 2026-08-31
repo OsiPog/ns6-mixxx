@@ -99,9 +99,11 @@ Still constants at the top of `Numark-NS6-scripts.js`:
   carries between platter reports, which is exactly what makes a stopped wheel
   keep coasting.
 
-In `Numark NS6.midi.xml`, the pitch faders carry `<invert/>`. If yours run
-backwards, take it out — DJ software disagrees about which end of a pitch fader
-is "faster".
+The pitch faders are inverted, in `NS6.rateFromFader` in the script. If yours
+run backwards, drop the minus sign there — DJ software disagrees about which end
+of a pitch fader is "faster". (This used to be `<invert/>` in the XML; the fader
+moved into script so that the takeover arrows beside it could be lit, which
+needs the fader's position and not just the deck's rate.)
 
 ## Regenerating the XML
 
@@ -123,8 +125,15 @@ channel 2 whichever layer it is showing. The mapping routes between that and
 Mixxx's per-deck controls, and re-points a side's lights when its LAYER button
 is pressed.
 
-One caution if you go poking at this yourself: **CC 57 on channel 1 takes the
-device off the USB bus** and needs a power cycle. See
+Every recorded light is driven. Besides the obvious ones, that means the
+pitch fader's centre detent and its two soft-takeover arrows, the four LOOP
+CONTROL buttons — which follow whichever mode the section is in, so in Autoloop
+they show the length of the loop you have — and the SHIFT button while it is
+held. CRATES, PREPARE and FILES have no state to show and are simply lit;
+`NS6.litNavButtons` turns that off.
+
+One caution if you go poking at this yourself: **CC 57 on channel 1 and CC 59 on
+channel 4 take the device off the USB bus** and need a power cycle. See
 [docs/MIDI-MAP.md](docs/MIDI-MAP.md#leds).
 
 ## Gaps
@@ -140,3 +149,12 @@ per-channel FX SEND buttons, the FX B select knob's press, the scroll knob's
 press, and three unidentified channel-1 CCs. They are listed in
 [docs/MIDI-MAP.md](docs/MIDI-MAP.md#not-recorded). Everything else on the panel
 is here.
+
+Recording them does not mean recording the panel again: `ns6 map` carries over
+everything already in `ns6-surface.toml` and asks only about what is missing, so
+copying [docs/recorded-surface.toml](docs/recorded-surface.toml) in as
+`ns6-surface.toml` and running it leaves just those controls to name.
+
+One deliberate blank: **LOOP SELECT stays dark in Manual mode.** It is mapped to
+`loop_exit` here and has no state of its own to show. If the hardware's own
+behaviour was to light it for something, that is not reproduced.

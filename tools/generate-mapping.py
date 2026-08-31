@@ -81,6 +81,8 @@ GLOBAL_LEDS = {
     "send_a": 0x44,    # channel 1 FX A; then B, then channel 2 A/B, ...
     "master_a": 0x4C,
     "master_b": 0x4D,
+    # 0x50, 0x51 and 0x52 also reach the layer lamps; see docs/MIDI-MAP.md.
+    # Unused, because 0x11 and 0x28 cover every state.
 }
 
 # Per-deck LEDs, sent on the deck side's channel: 2 for the left deck, 3 for
@@ -291,8 +293,13 @@ for d in DECKS:
                  "be computed in script.")
     x.control(g, "NS6.platterMsb", 0xB0 | ch, 0x00, ["script-binding"])
     x.control(g, "NS6.platterLsb", 0xB0 | ch, 0x20, ["script-binding"])
-    x.comment(3, "PITCH FADER. If it feels backwards, swap <invert/> in or out here.")
-    x.wide(g, "rate", ch, 0x01, ["soft-takeover", "invert"])
+    x.comment(3, "PITCH FADER: 14-bit absolute. Through script rather than bound "
+                 "straight to `rate`, because the two arrows beside it show the "
+                 "gap between the fader and the deck's rate, and only script "
+                 "gets told where the fader is. Mixxx still does the takeover; "
+                 "see NS6.init. Inversion moved with it, into NS6.rateFromFader.")
+    x.control(g, "NS6.pitchMsb", 0xB0 | ch, 0x01, ["script-binding"])
+    x.control(g, "NS6.pitchLsb", 0xB0 | ch, 0x21, ["script-binding"])
     x.comment(3, "STRIP SEARCH: absolute position along the track.")
     x.control(g, "NS6.stripSearch", 0xB0 | ch, 0x02, ["script-binding"])
     for note, (key, opts) in sorted(DECK_BUTTONS.items()):
@@ -302,10 +309,10 @@ for d in DECKS:
     x.comment(3, "LOAD A / LOAD B address a deck and are sent on that deck's channel.")
     x.control(g, "LoadSelectedTrack", 0x90 | ch, 0x0C, ["Button"])
     x.control(g, "LoadSelectedTrack", 0x90 | ch, 0x0E, ["Button"])
-    x.comment(3, "The per-channel FX SEND buttons are not mapped: their note "
-                 "numbers were never captured. Only the two master FX SEND "
-                 "buttons, and the scroll knob's press, are missing from this "
-                 "mapping for the same reason.")
+    x.comment(3, "The eight per-channel FX SEND buttons are not mapped, nor is "
+                 "the FX B SELECT knob's press or the SCROLL knob's press: "
+                 "their note numbers were never captured. See "
+                 "docs/MIDI-MAP.md, Not recorded.")
 
 x.line(2, "</controls>")
 
