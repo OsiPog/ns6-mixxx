@@ -144,6 +144,19 @@ they show the length of the loop you have — and the SHIFT button while it is
 held. CRATES, PREPARE and FILES have no state to show and are simply lit;
 `NS6.litNavButtons` turns that off.
 
+Some of the panel is not lamps at all but **displays**, whose value is a position
+or a fill. The two **FX PARAM rings** follow their unit's parameter across eleven
+positions, and each deck's **STRIP SEARCH bar** fills to the play position across
+fifteen LEDs — a loaded track at its start shows one LED, because a dark bar
+already means "no track". Position updates are only sent when the number on the
+display actually changes, which turns a few hundred playposition callbacks a
+minute into a handful of messages.
+
+Two displays are found and documented but deliberately not driven: the **Serato
+bar**, which has no natural Mixxx equivalent, and the **platter rings**, which
+also carry a colour and want a decision about what red should mean. Both are in
+[docs/MIDI-MAP.md](docs/MIDI-MAP.md#the-position-displays) if you want them.
+
 One caution if you go poking at this yourself: **CC 57 on channel 1 and CC 59 on
 channel 4 take the device off the USB bus** and need a power cycle. See
 [docs/MIDI-MAP.md](docs/MIDI-MAP.md#leds).

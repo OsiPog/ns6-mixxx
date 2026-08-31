@@ -139,6 +139,7 @@ NS6.init = function () {
     engine.beginTimer(NS6.initialLedDelayMs, function () {
         NS6.connectSide("A");
         NS6.connectSide("B");
+        NS6.connectGlobal();
         NS6.drawPanel(true);
     }, true);
 };
@@ -170,7 +171,16 @@ NS6.shutdown = function () {
         // 0 is the layer display's "show nothing", which it never does on its
         // own; deliberate here, because the rest of the panel is going dark too.
         NS6.sendLedValue(side.channel, side.indicator, 0);
+        NS6.sendLedValue(side.channel, NS6.displays.stripSearch, 0);
     });
+    NS6.globalConnections.forEach(function (c) {
+        c.disconnect();
+    });
+    NS6.globalConnections = [];
+    [1, 2].forEach(function (unit) {
+        NS6.sendLedValue(0x00, NS6.displays.fxParam[unit], 0);
+    });
+    NS6.shown = {};
     NS6.drawPanel(false);
 };
 
@@ -583,6 +593,35 @@ NS6.pitchLeds = {
     down: 0x3D,
 };
 
+// Displays whose value is a position or a fill rather than on-ness. Nothing
+// here may be sent 0x7F: on every one of them that is off the end of the scale
+// and shows nothing at all, which is why they went unmapped for so long. See
+// docs/MIDI-MAP.md.
+NS6.displays = {
+    // FX PARAM rings, eleven positions. Panel-wide, so any channel reaches them.
+    fxParam: { 1: 0x13, 2: 0x2A },
+    // The bar above STRIP SEARCH, fifteen LEDs, filled. Addressed by deck side.
+    stripSearch: 0x4E,
+};
+
+// Don't resend a value a display already shows.
+//
+// playposition changes many times a second while a track plays and the strip
+// search bar has fifteen steps, so nearly all of those updates ask for the
+// number already on the panel. Dropping them matters more here than tidiness
+// would suggest: this is the same pipe the vendor driver bit-bangs an audio
+// chip's register interface through, and it is what takes the device off the bus
+// when too much unexpected traffic goes down it.
+NS6.shown = {};
+NS6.sendLedOnce = function (channel, cc, value) {
+    var key = channel + ":" + cc;
+    if (NS6.shown[key] === value) {
+        return;
+    }
+    NS6.shown[key] = value;
+    NS6.sendLedValue(channel, cc, value);
+};
+
 // CRATES, PREPARE and FILES, which answer on any channel. Their buttons move
 // focus in the library and have no state to show, so they are simply lit - an
 // unlit button on this panel reads as a dead one. Set this false for a dark
@@ -703,6 +742,31 @@ NS6.updatePitchLeds = function (group) {
     NS6.sendLed(side.channel, NS6.pitchLeds.down, gap < -NS6.takeoverSlack);
 };
 
+// STRIP SEARCH's bar: fifteen LEDs filled to the play position.
+//
+// A loaded track at its very start shows one LED rather than none, because a dark
+// bar already means something else - no track - and the two should not look alike.
+NS6.updateStripSearch = function (group) {
+    var side = NS6.ledSideFor(group);
+    if (side === null) {
+        return;
+    }
+    var fill = 0;
+    if (engine.getValue(group, "track_loaded") === 1) {
+        var at = engine.getValue(group, "playposition");
+        fill = Math.max(1, Math.min(15, Math.round(at * 15)));
+    }
+    NS6.sendLedOnce(side.channel, NS6.displays.stripSearch, fill);
+};
+
+// An FX PARAM ring, eleven positions, following that unit's parameter. Panel-wide
+// rather than per deck, so it is not part of either side's connections.
+NS6.updateFxParam = function (unit) {
+    var group = "[EffectRack1_EffectUnit" + unit + "_Effect1]";
+    var meta = Math.max(0, Math.min(1, engine.getValue(group, "meta")));
+    NS6.sendLedOnce(0x00, NS6.displays.fxParam[unit], 1 + Math.round(meta * 10));
+};
+
 // Controls to watch for each of those, since neither is one control's value.
 // Listed after the functions because these are plain properties, not
 // declarations, and are not hoisted.
@@ -719,7 +783,30 @@ NS6.derivedLeds = [
         keys: ["rate", "rateRange"],
         draw: NS6.updatePitchLeds,
     },
+    {
+        keys: ["playposition", "track_loaded"],
+        draw: NS6.updateStripSearch,
+    },
 ];
+
+// The panel-wide displays, which belong to no deck side and so are connected
+// once rather than rebuilt when a layer switches.
+NS6.globalConnections = [];
+
+NS6.connectGlobal = function () {
+    NS6.globalConnections.forEach(function (c) {
+        c.disconnect();
+    });
+    NS6.globalConnections = [];
+    [1, 2].forEach(function (unit) {
+        var group = "[EffectRack1_EffectUnit" + unit + "_Effect1]";
+        var connection = engine.makeConnection(group, "meta", function () {
+            NS6.updateFxParam(unit);
+        });
+        connection.trigger();
+        NS6.globalConnections.push(connection);
+    });
+};
 
 // --- Wiring ----------------------------------------------------------------
 

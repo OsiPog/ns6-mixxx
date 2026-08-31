@@ -92,6 +92,20 @@ GLOBAL_LEDS = {
 # NS6.sendLayerLed; see docs/MIDI-MAP.md.
 LAYER_LED_VALUES = {"base": 1, "alternate": 2, "dark": 0}
 
+# Displays whose value is a position or a fill rather than on-ness. 0x7F is off
+# the end of every one of them and shows nothing, which is why a sweep at 0x7F
+# never found them. Driven from script; see NS6.displays and docs/MIDI-MAP.md.
+DISPLAYS = {
+    "fx1_param": 0x13,     # FX A PARAM ring, position 1..11, any channel
+    "fx2_param": 0x2A,     # FX B PARAM ring, position 1..11, any channel
+    "serato_bar": 0x36,    # position 1..11, any channel - not driven, no use for it
+    "strip_search": 0x4E,  # fill 1..15, on the deck side's channel
+    # The platter rings are one number for both decks, packing colour, deck and
+    # fill into the value: colour * 64 + deck * 32 + fill, fill 1..21. Channel 2
+    # only - unlike every other per-deck light. Not driven yet.
+    "platter_rings": 0x3A,
+}
+
 # Per-deck LEDs, sent on the deck side's channel: 2 for the left deck, 3 for
 # the right. Driven from script, so this table is here only for reference; the
 # authoritative copy is in Numark-NS6-scripts.js.
