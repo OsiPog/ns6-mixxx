@@ -225,16 +225,26 @@ Both statuses have to be declared, pointing at the same handler.
 | 0x44–0x4B | 68–75 | FX SEND, channel 1 A/B through channel 4 A/B |
 | 0x4C | 76 | FX SEND A to master |
 | 0x4D | 77 | FX SEND B to master |
+| 0x50 | 80 | Layer lamps: left shows 3, right shows 2 |
+| 0x51 | 81 | Layer lamps: left shows 1, right shows 4 |
+| 0x52 | 82 | Layer lamps: left shows 1, right shows 2 |
 
-### One message will take the device off the USB bus
+### Two messages will take the device off the USB bus
 
-**CC 57 on channel 1** drops the NS6 off the bus; it needs a power cycle to come
-back. It is not a MIDI message as far as the hardware is concerned. The MIDI OUT
+| Message | |
+|---|---|
+| **CC 57 on channel 1** | confirmed twice |
+| **CC 59 on channel 4** | found by the second sweep, the same way |
+
+Either drops the NS6 off the bus, and it needs a power cycle to come back.
+Neither is a MIDI message as far as the hardware is concerned. The MIDI OUT
 byte stream doubles as a serial register interface into an audio chip — the
 vendor driver clocks bits through it with the byte patterns
 `addr | 0x00/0x40/0x80/0xC0/0xE0` — so some values reach hardware that has
 nothing to do with lighting buttons.
 
+Note that the two are on different channels and different numbers, so they are
+not one register seen twice, and there is no pattern here to extrapolate from.
 Others may exist. Anything not listed above was swept and did nothing, but that
 was with value 127; other values were not tried.
 

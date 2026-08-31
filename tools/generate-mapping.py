@@ -110,6 +110,11 @@ DECK_LEDS = {
     "takeover_down": 0x3D,
 }
 
+# Sending these takes the device off the USB bus; it needs a power cycle. Not a
+# hazard for this mapping, which sends nothing near them, but worth carrying
+# next to the numbers so a hand-edit does not rediscover them.
+HAZARD_LEDS = [(1, 0x39), (4, 0x3B)]  # (MIDI channel, CC)
+
 
 def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")

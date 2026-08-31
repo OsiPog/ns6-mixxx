@@ -1,23 +1,16 @@
 # Numark NS6 LED map, recorded with `ns6 leds`.
 # Send the message to the device to light what is described.
 
-[[led]]
-description = "fx b toggle"
-channel = 0
+[[hazard]]  # took the device off the bus
+channel = 3
 kind = "cc"
-number = 46  # 0x2E
+number = 59  # 0x3B
 
 [[led]]
 description = "deck b layer 4 selected"
 channel = 0
 kind = "cc"
 number = 40  # 0x28
-
-[[led]]
-description = "fx a toggle"
-channel = 0
-kind = "cc"
-number = 23  # 0x17
 
 [[led]]
 description = "deck a layer 3 selected"
@@ -42,66 +35,6 @@ description = "serato crates"
 channel = 0
 kind = "cc"
 number = 3  # 0x03
-
-[[led]]
-description = "channel 1 fx a toggle"
-channel = 0
-kind = "cc"
-number = 68  # 0x44
-
-[[led]]
-description = "channel 2 fx a toggle"
-channel = 0
-kind = "cc"
-number = 70  # 0x46
-
-[[led]]
-description = "channel 2 fx b toggle"
-channel = 0
-kind = "cc"
-number = 71  # 0x47
-
-[[led]]
-description = "channel 1 fx b toggle"
-channel = 0
-kind = "cc"
-number = 69  # 0x45
-
-[[led]]
-description = "channel 3 fx a toggle"
-channel = 0
-kind = "cc"
-number = 72  # 0x48
-
-[[led]]
-description = "channel 3 fx b toggle"
-channel = 0
-kind = "cc"
-number = 73  # 0x49
-
-[[led]]
-description = "channel 4 fx a toggle"
-channel = 0
-kind = "cc"
-number = 74  # 0x4A
-
-[[led]]
-description = "channel 4 fx b toggle"
-channel = 0
-kind = "cc"
-number = 75  # 0x4B
-
-[[led]]
-description = "serato master fx a toggle"
-channel = 0
-kind = "cc"
-number = 76  # 0x4C
-
-[[led]]
-description = "serato master fx b toggle"
-channel = 0
-kind = "cc"
-number = 77  # 0x4D
 
 [[led]]
 description = "both: deck a channel 3 selected, deck b channel 2 selected"
@@ -224,12 +157,6 @@ kind = "cc"
 number = 22  # 0x16
 
 [[led]]
-description = "fx a toggle"
-channel = 1
-kind = "cc"
-number = 23  # 0x17
-
-[[led]]
 description = "deck a loop control mode"
 channel = 1
 kind = "cc"
@@ -266,12 +193,6 @@ kind = "cc"
 number = 40  # 0x28
 
 [[led]]
-description = "fx b toggle"
-channel = 1
-kind = "cc"
-number = 46  # 0x2E
-
-[[led]]
 description = "deck a pitch control up arrow"
 channel = 1
 kind = "cc"
@@ -282,12 +203,6 @@ description = "deck a pitch control down arrow"
 channel = 1
 kind = "cc"
 number = 61  # 0x3D
-
-[[led]]
-description = "deck b sync"
-channel = 2
-kind = "cc"
-number = 7  # 0x07
 
 [[led]]
 description = "deck b cue"
@@ -362,12 +277,6 @@ kind = "cc"
 number = 22  # 0x16
 
 [[led]]
-description = "fx a toggle"
-channel = 2
-kind = "cc"
-number = 23  # 0x17
-
-[[led]]
 description = "deck b loop control mode"
 channel = 2
 kind = "cc"
@@ -386,18 +295,6 @@ kind = "cc"
 number = 40  # 0x28
 
 [[led]]
-description = "fx b toggle"
-channel = 2
-kind = "cc"
-number = 46  # 0x2E
-
-[[led]]
-description = "deck b pitch control middle"
-channel = 2
-kind = "cc"
-number = 55  # 0x37
-
-[[led]]
 description = "deck b pitch control down arrow"
 channel = 2
 kind = "cc"
@@ -410,7 +307,505 @@ kind = "cc"
 number = 60  # 0x3C
 
 [[led]]
-description = "the next 8 this including are again fx a,b of channel 1,2,3,4"
+description = "fx a lit"
+channel = 0
+kind = "cc"
+number = 23  # 0x17
+
+[[led]]
+description = "fx b lit"
+channel = 0
+kind = "cc"
+number = 46  # 0x2E
+
+[[led]]
+description = "channel 1 fx a"
+channel = 0
+kind = "cc"
+number = 68  # 0x44
+
+[[led]]
+description = "channel 1 fx b"
+channel = 0
+kind = "cc"
+number = 69  # 0x45
+
+[[led]]
+description = "channel 2 fx a"
+channel = 0
+kind = "cc"
+number = 70  # 0x46
+
+[[led]]
+description = "channel 2 fx b"
+channel = 0
+kind = "cc"
+number = 71  # 0x47
+
+[[led]]
+description = "channel 3 fx a"
+channel = 0
+kind = "cc"
+number = 72  # 0x48
+
+[[led]]
+description = "channel 3 fx b"
+channel = 0
+kind = "cc"
+number = 73  # 0x49
+
+[[led]]
+description = "channel 4 fx a"
+channel = 0
+kind = "cc"
+number = 74  # 0x4A
+
+[[led]]
+description = "channel 4 fx b"
+channel = 0
+kind = "cc"
+number = 75  # 0x4B
+
+[[led]]
+description = "serato master fx a"
+channel = 0
+kind = "cc"
+number = 76  # 0x4C
+
+[[led]]
+description = "serato master fx b"
+channel = 0
+kind = "cc"
+number = 77  # 0x4D
+
+[[led]]
+description = "fx a"
+channel = 1
+kind = "cc"
+number = 23  # 0x17
+
+[[led]]
+description = "fx b"
+channel = 1
+kind = "cc"
+number = 46  # 0x2E
+
+[[led]]
+description = "deck a pitch control 0%"
+channel = 1
+kind = "cc"
+number = 55  # 0x37
+
+[[led]]
+description = "channel 1 fx a"
+channel = 1
+kind = "cc"
+number = 68  # 0x44
+
+[[led]]
+description = "channel 1 fx b"
+channel = 1
+kind = "cc"
+number = 69  # 0x45
+
+[[led]]
+description = "channel 2 fx a"
+channel = 1
+kind = "cc"
+number = 70  # 0x46
+
+[[led]]
+description = "channel 2 fx b"
+channel = 1
+kind = "cc"
+number = 71  # 0x47
+
+[[led]]
+description = "channel 3 fx a"
+channel = 1
+kind = "cc"
+number = 72  # 0x48
+
+[[led]]
+description = "channel 3 fx b"
+channel = 1
+kind = "cc"
+number = 73  # 0x49
+
+[[led]]
+description = "channel 4 fx a"
+channel = 1
+kind = "cc"
+number = 74  # 0x4A
+
+[[led]]
+description = "channel 4 fx b"
+channel = 1
+kind = "cc"
+number = 75  # 0x4B
+
+[[led]]
+description = "serato master fx a"
+channel = 1
+kind = "cc"
+number = 76  # 0x4C
+
+[[led]]
+description = "serato master fx b"
+channel = 1
+kind = "cc"
+number = 77  # 0x4D
+
+[[led]]
+description = "deck a channel 3"
+channel = 1
+kind = "cc"
+number = 80  # 0x50
+
+[[led]]
+description = "deck b channel 4"
+channel = 1
+kind = "cc"
+number = 81  # 0x51
+
+[[led]]
+description = "serato crates"
+channel = 2
+kind = "cc"
+number = 3  # 0x03
+
+[[led]]
+description = "serato prepare"
+channel = 2
+kind = "cc"
+number = 4  # 0x04
+
+[[led]]
+description = "serato files"
+channel = 2
+kind = "cc"
+number = 5  # 0x05
+
+[[led]]
+description = "deck b sync"
+channel = 2
+kind = "cc"
+number = 7  # 0x07
+
+[[led]]
+description = "fx a"
+channel = 2
+kind = "cc"
+number = 23  # 0x17
+
+[[led]]
+description = "fx b"
+channel = 2
+kind = "cc"
+number = 46  # 0x2E
+
+[[led]]
+description = "deck b pitch control 0% (middle)"
+channel = 2
+kind = "cc"
+number = 55  # 0x37
+
+[[led]]
+description = "channel 1 fx a"
 channel = 2
 kind = "cc"
 number = 68  # 0x44
+
+[[led]]
+description = "channel 1 fx b"
+channel = 2
+kind = "cc"
+number = 69  # 0x45
+
+[[led]]
+description = "channel 2 fx a"
+channel = 2
+kind = "cc"
+number = 70  # 0x46
+
+[[led]]
+description = "channel 2 fx b"
+channel = 2
+kind = "cc"
+number = 71  # 0x47
+
+[[led]]
+description = "channel 3 fx a"
+channel = 2
+kind = "cc"
+number = 72  # 0x48
+
+[[led]]
+description = "channel 3 fx b"
+channel = 2
+kind = "cc"
+number = 73  # 0x49
+
+[[led]]
+description = "channel 4 fx a"
+channel = 2
+kind = "cc"
+number = 74  # 0x4A
+
+[[led]]
+description = "channel 4 fx b"
+channel = 2
+kind = "cc"
+number = 75  # 0x4B
+
+[[led]]
+description = "serato master fx a"
+channel = 2
+kind = "cc"
+number = 76  # 0x4C
+
+[[led]]
+description = "serato master fx b"
+channel = 2
+kind = "cc"
+number = 77  # 0x4D
+
+[[led]]
+description = "deck a channel 3"
+channel = 2
+kind = "cc"
+number = 80  # 0x50
+
+[[led]]
+description = "deck b channel 4"
+channel = 2
+kind = "cc"
+number = 81  # 0x51
+
+[[led]]
+description = "serato crates"
+channel = 3
+kind = "cc"
+number = 3  # 0x03
+
+[[led]]
+description = "serato prepare"
+channel = 3
+kind = "cc"
+number = 4  # 0x04
+
+[[led]]
+description = "serato files"
+channel = 3
+kind = "cc"
+number = 5  # 0x05
+
+[[led]]
+description = "deck a channel 3"
+channel = 3
+kind = "cc"
+number = 17  # 0x11
+
+[[led]]
+description = "fx a"
+channel = 3
+kind = "cc"
+number = 23  # 0x17
+
+[[led]]
+description = "deck b channel 4"
+channel = 3
+kind = "cc"
+number = 40  # 0x28
+
+[[led]]
+description = "fx b"
+channel = 3
+kind = "cc"
+number = 46  # 0x2E
+
+[[led]]
+description = "channel 1 fx a"
+channel = 3
+kind = "cc"
+number = 68  # 0x44
+
+[[led]]
+description = "channel 1 fx b"
+channel = 3
+kind = "cc"
+number = 69  # 0x45
+
+[[led]]
+description = "channel 2 fx a"
+channel = 3
+kind = "cc"
+number = 70  # 0x46
+
+[[led]]
+description = "channel 2 fx b"
+channel = 3
+kind = "cc"
+number = 71  # 0x47
+
+[[led]]
+description = "channel 3 fx a"
+channel = 3
+kind = "cc"
+number = 72  # 0x48
+
+[[led]]
+description = "channel 3 fx b"
+channel = 3
+kind = "cc"
+number = 73  # 0x49
+
+[[led]]
+description = "chhanel 4 fx a"
+channel = 3
+kind = "cc"
+number = 74  # 0x4A
+
+[[led]]
+description = "channel 4 fx b"
+channel = 3
+kind = "cc"
+number = 75  # 0x4B
+
+[[led]]
+description = "serato master fx a"
+channel = 3
+kind = "cc"
+number = 76  # 0x4C
+
+[[led]]
+description = "serato master fx b"
+channel = 3
+kind = "cc"
+number = 77  # 0x4D
+
+[[led]]
+description = "deck a channel 3"
+channel = 3
+kind = "cc"
+number = 80  # 0x50
+
+[[led]]
+description = "deck b channel 4"
+channel = 3
+kind = "cc"
+number = 81  # 0x51
+
+[[led]]
+description = "serato crates"
+channel = 4
+kind = "cc"
+number = 3  # 0x03
+
+[[led]]
+description = "serato prepare"
+channel = 4
+kind = "cc"
+number = 4  # 0x04
+
+[[led]]
+description = "serato files"
+channel = 4
+kind = "cc"
+number = 5  # 0x05
+
+[[led]]
+description = "deck a channel 3"
+channel = 4
+kind = "cc"
+number = 17  # 0x11
+
+[[led]]
+description = "fx a"
+channel = 4
+kind = "cc"
+number = 23  # 0x17
+
+[[led]]
+description = "deck b channel 4"
+channel = 4
+kind = "cc"
+number = 40  # 0x28
+
+[[led]]
+description = "fx b"
+channel = 4
+kind = "cc"
+number = 46  # 0x2E
+
+[[led]]
+description = "channel 1 fx b"
+channel = 4
+kind = "cc"
+number = 69  # 0x45
+
+[[led]]
+description = "channel 1 fx a"
+channel = 4
+kind = "cc"
+number = 68  # 0x44
+
+[[led]]
+description = "channel 2 fx a"
+channel = 4
+kind = "cc"
+number = 70  # 0x46
+
+[[led]]
+description = "channel 2 fx b"
+channel = 4
+kind = "cc"
+number = 71  # 0x47
+
+[[led]]
+description = "channel 3 fx a"
+channel = 4
+kind = "cc"
+number = 72  # 0x48
+
+[[led]]
+description = "channel 3 fx b"
+channel = 4
+kind = "cc"
+number = 73  # 0x49
+
+[[led]]
+description = "channel 4 fx a"
+channel = 4
+kind = "cc"
+number = 74  # 0x4A
+
+[[led]]
+description = "channel 4 fx b"
+channel = 4
+kind = "cc"
+number = 75  # 0x4B
+
+[[led]]
+description = "serato master fx a"
+channel = 4
+kind = "cc"
+number = 76  # 0x4C
+
+[[led]]
+description = "serato master fx b"
+channel = 4
+kind = "cc"
+number = 77  # 0x4D
+
+[[led]]
+description = "deck a channel 3"
+channel = 4
+kind = "cc"
+number = 80  # 0x50
+
+[[led]]
+description = "deck b channel 4"
+channel = 4
+kind = "cc"
+number = 81  # 0x51
