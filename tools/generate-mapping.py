@@ -23,10 +23,6 @@ DECK_BUTTONS = {
     0x19: ("rate_temp_up", ["Button"]),
     0x1E: ("bpm_tap", ["Button"]),
     0x1F: ("beats_translate_curpos", ["Button"]),
-    0x22: ("loop_halve", ["Button"]),
-    0x23: ("loop_double", ["Button"]),
-    0x25: ("loop_move_1_backward", ["Button"]),
-    0x26: ("loop_move_1_forward", ["Button"]),
 }
 
 # Buttons that go to script: their behaviour depends on shift or on a mode, or
@@ -47,6 +43,10 @@ DECK_SCRIPT_BUTTONS = {
     0x1D: "skip",            # held: platter jumps by beat
     0x20: "beatgridAdjust",
     0x21: "scratchMode",     # toggles platter scratch vs pitch bend
+    0x22: "loopHalve",       # LOOP 1/2 X, shift = smaller seek distance
+    0x23: "loopDouble",      # LOOP 2 X,   shift = larger seek distance
+    0x25: "loopShiftLeft",   # LOOP SHIFT, shift = seek back
+    0x26: "loopShiftRight",  # LOOP SHIFT, shift = seek forward
     0x27: "loopMode",        # manual <-> autoloop
     0x28: "loopButton1",     # IN  / 1 beat
     0x29: "loopButton2",     # OUT / 2 beats

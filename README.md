@@ -64,10 +64,25 @@ ON/OFF does nothing until a loop exists — that is the hardware's behaviour, no
 a gap in the mapping — so make one with IN and OUT, or with a numbered button in
 Autoloop mode, first. Autoloop needs the track to have a beatgrid.
 
-**SHIFT** is the DELETE CUE / SHIFT button, as on the panel. Held, it turns hot
-cues into hot cue *deletes* (the NS6 cannot overwrite a cue point without
-clearing it first), REVERSE into BLEEP, and the loop buttons into loop rolls or
-stored-loop jumps.
+**SHIFT** is the DELETE CUE / SHIFT button, as on the panel, and it is per deck —
+each deck side has its own, on its own MIDI channel. Held, it changes:
+
+| Button | Plain | With SHIFT |
+|---|---|---|
+| HOT CUE 1–5 | jump to the cue | **delete** it — the NS6 cannot overwrite a cue without clearing it first |
+| BLEEP / REVERSE | reverse, and playback continues from where it stops | **bleep**: the track runs on underneath and resumes where it would have been |
+| LOOP 1–4 | beatloop, or IN / OUT / SELECT / RELOOP | loop rolls in Manual mode, stored-loop jumps in Autoloop |
+| LOOP SHIFT ← → | move the loop | **seek** the track back and forward |
+| LOOP 2 X, LOOP ½ X | double or halve the loop | double or halve the **seek distance** |
+| BEAT GRID ADJUST | snap the nearest marker to the playhead | align the grid to the other deck |
+
+The seek distance is Mixxx's own `beatjump_size`, not a number this mapping keeps
+to itself, so it is the same size Mixxx shows in its skin and uses for beatjump
+elsewhere — the panel and the screen cannot disagree about it, and it survives a
+mapping reload. It runs from 1/32 of a beat to 64 beats. Seeking is in beats, so
+like Autoloop it needs the track to have a beatgrid.
+
+Every other deck button ignores SHIFT rather than doing something invented for it.
 
 Deck switching needs nothing from Mixxx: the LAYER buttons make a deck side
 transmit on a different MIDI channel, and all four channels are mapped.

@@ -565,6 +565,77 @@ NS6.loopButton = function (n, value, group) {
     }
 };
 
+// --- Seeking ------------------------------------------------------------------
+
+// SHIFT turns the four loop-size and loop-shift buttons into a seek: the two
+// LOOP SHIFT buttons jump the track, and LOOP 2 X and LOOP 1/2 X set how far.
+//
+// The distance is Mixxx's own beatjump_size rather than a number kept in here.
+// That matters: it is the same size Mixxx shows in its skin and uses for beatjump
+// everywhere else, so the panel and the screen cannot disagree about it, and a
+// size set with these buttons is still there after the mapping reloads.
+//
+// Seeking is in beats, so it needs the track to have a beatgrid - as autoloop
+// does. Without one, nothing happens.
+NS6.seekMin = 1 / 32;
+NS6.seekMax = 64;
+
+NS6.nudgeSeek = function (group, factor) {
+    var size = engine.getValue(group, "beatjump_size") * factor;
+    engine.setValue(
+        group,
+        "beatjump_size",
+        Math.max(NS6.seekMin, Math.min(NS6.seekMax, size))
+    );
+};
+
+// A trigger wants a press and a release, not a value left at 1, or the second
+// press has nothing to change - the same reason NS6.fxSelect does this.
+NS6.trigger = function (group, key) {
+    engine.setValue(group, key, 1);
+    engine.setValue(group, key, 0);
+};
+
+NS6.loopHalve = function (channel, control, value, status, group) {
+    if (NS6.deckState(group).shift) {
+        if (value > 0) {
+            NS6.nudgeSeek(group, 0.5);
+        }
+        return;
+    }
+    engine.setValue(group, "loop_halve", value > 0 ? 1 : 0);
+};
+
+NS6.loopDouble = function (channel, control, value, status, group) {
+    if (NS6.deckState(group).shift) {
+        if (value > 0) {
+            NS6.nudgeSeek(group, 2);
+        }
+        return;
+    }
+    engine.setValue(group, "loop_double", value > 0 ? 1 : 0);
+};
+
+NS6.loopShiftLeft = function (channel, control, value, status, group) {
+    if (NS6.deckState(group).shift) {
+        if (value > 0) {
+            NS6.trigger(group, "beatjump_backward");
+        }
+        return;
+    }
+    engine.setValue(group, "loop_move_1_backward", value > 0 ? 1 : 0);
+};
+
+NS6.loopShiftRight = function (channel, control, value, status, group) {
+    if (NS6.deckState(group).shift) {
+        if (value > 0) {
+            NS6.trigger(group, "beatjump_forward");
+        }
+        return;
+    }
+    engine.setValue(group, "loop_move_1_forward", value > 0 ? 1 : 0);
+};
+
 NS6.loopButton1 = function (c, ctl, value, s, group) { NS6.loopButton(1, value, group); };
 NS6.loopButton2 = function (c, ctl, value, s, group) { NS6.loopButton(2, value, group); };
 NS6.loopButton3 = function (c, ctl, value, s, group) { NS6.loopButton(3, value, group); };
@@ -977,6 +1048,7 @@ NS6.observeDeck = function (group) {
     "platterMsb", "platterLsb", "pitchMsb", "pitchLsb", "stripSearch",
     "shift", "keylock", "pitchRange", "reverse", "skip", "beatgridAdjust",
     "scratchMode", "loopMode", "loopToggle",
+    "loopHalve", "loopDouble", "loopShiftLeft", "loopShiftRight",
     "hotcue1", "hotcue2", "hotcue3", "hotcue4", "hotcue5",
     "loopButton1", "loopButton2", "loopButton3", "loopButton4",
 ].forEach(function (name) {
