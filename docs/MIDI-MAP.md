@@ -297,10 +297,39 @@ is not a guess: the block that found it drove eight numbers and fifteen LEDs cam
 on, and eight messages cannot light fifteen segments, so one number is carrying the
 whole strip.
 
-So the panel has at least three value conventions — the layer indicators saturate,
-the position displays go dark past their end, and the strip search fills. None of
-the three can be inferred from the others, which is the argument for measuring each
-one.
+**Packed** — one number carrying a fill, a deck *and* a colour in its value:
+
+| CC | Dec | Display | Channel |
+|---|---|---|---|
+| 0x3A | 58 | Platter ring, **both decks** | 2 |
+
+```text
+value = colour * 64 + deck * 32 + fill
+  colour   0 white, 1 red
+  deck     0 left, 1 right
+  fill     0 dark, 1-21 that many LEDs of 21
+```
+
+21 is the left ring fully white, 53 the right ring fully white, 85 the left fully
+red, 117 the right fully red — all four verified. 10 gives the left ring half
+filled, which is what shows it fills rather than points, and 22 goes dark rather
+than staying full.
+
+Two things about this one are easy to get wrong.
+
+**It is not addressed by deck channel.** Every other per-deck light is — channel 2
+is the left deck, channel 3 the right. Here a single CC on channel 2 drives both
+rings and a bit in the value picks which. Assuming the usual pattern and writing to
+channel 3 gets nothing at all.
+
+**Each message sets one ring and leaves the other alone.** There is no message that
+addresses both and no implicit clear, so software has to hold both states itself and
+rewrite whichever one it changes.
+
+So the panel has at least four value conventions — the layer indicators saturate,
+the position displays go dark past their end, the strip search fills, and the
+platter ring packs a fill, a deck and a colour into one byte. None of them can be
+inferred from the others, which is the argument for measuring each one.
 
 **A host that treats any of them as a lamp gets nothing at all.** 0x7F is off the
 end of every one, so the obvious "on" value is indistinguishable from silence. That
@@ -309,9 +338,10 @@ document sent every candidate at exactly 127.
 
 To drive one from a 0..1 control, scale into its range and send 0 for "nothing".
 
-**Still unfound:** the ring around each platter. It responded during the sweep that
-turned up the others, so it exists and is reachable, but it has not been narrowed to
-a number yet.
+**Still unfound:** nothing on the display side. The MASTER meter answered nothing on
+any channel at any value, which is what a meter driven in hardware from the analog
+output would do, and is the one thing here the host may simply not be able to
+reach.
 
 ### Why the sweep could not find them
 

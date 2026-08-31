@@ -59,3 +59,45 @@ channel = 2
 kind = "cc"
 numbers = [78]
 value = 15
+
+[[display]]
+description = "deck a platter ring, white, all 21 lit"
+channel = 1
+kind = "cc"
+numbers = [58]
+value = 21
+
+[[display]]
+description = "deck b platter ring, white, all 21 lit"
+channel = 1
+kind = "cc"
+numbers = [58]
+value = 53
+
+[[display]]
+description = "deck a platter ring, red, all 21 lit"
+channel = 1
+kind = "cc"
+numbers = [58]
+value = 85
+
+[[display]]
+description = "deck b platter ring, red, all 21 lit"
+channel = 1
+kind = "cc"
+numbers = [58]
+value = 117
+
+[[display]]
+description = "deck a platter ring, white, 10 of 21 lit - so it fills, it does not point"
+channel = 1
+kind = "cc"
+numbers = [58]
+value = 10
+
+[[display]]
+description = "nothing: 22 is past the top of the 21-LED fill, and it goes dark rather than staying full"
+channel = 1
+kind = "cc"
+numbers = [58]
+value = 22
