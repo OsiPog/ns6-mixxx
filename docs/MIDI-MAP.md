@@ -263,30 +263,83 @@ the 0x00 that pairs with it darkens the display completely — a state the panel
 never enters by itself, and one that reads as a dead indicator rather than as
 "deck 1". Send 1 or 2, never 0x7F.
 
+### The position displays
+
+The panel carries several displays that are not lamps at all: the two FX PARAM
+indicators, the Serato bar, and — on the deck channels — a strip search bar and a
+ring around each platter. Each is a row of LEDs with **one lit at a time**, and
+the CC's value says *which*.
+
+Measured on channel 1, one value at a time:
+
+| CC | Dec | Display | Positions |
+|---|---|---|---|
+| 0x13 | 19 | FX A PARAM indicator | 1–11 |
+| 0x2A | 42 | FX B PARAM indicator | 1–11 |
+| 0x36 | 54 | Serato bar | 1–11 |
+
+Value **0** lights nothing, **1–11** light that position, and **12 and above light
+nothing** — checked at 12, 20 and 127. Note that it does *not* saturate: unlike
+the layer indicators, where 2, 3 and 127 all select the alternate deck, going past
+the end of one of these displays turns it off rather than pinning it to the last
+LED. Two different rules on the same panel, so neither can be assumed from the
+other.
+
+**A host that treats these as lamps gets nothing at all.** 0x7F is position 127,
+which is off the end, so the obvious "on" value is indistinguishable from silence.
+That is not a hypothetical — it is why these went unmapped: the sweep that produced
+this document sent every candidate at exactly 127.
+
+To drive one from a 0..1 control, scale to 1..11 and send 0 for "no position".
+
+### Why the sweep could not find them
+
+Worth stating plainly, because it is a flaw in the method rather than bad luck, and
+the same flaw would hide the same things again.
+
+`ns6 leds` sends one message and asks what lit. For a button that is exactly
+right. For a display of eleven LEDs it is not: the honest answer to "what did CC 19
+light?" is *one segment* — a single LED among hundreds of candidates, easy to miss
+and easier to dismiss while naming buttons. Combined with the value being fixed at
+127, which is off the end of every one of these, the answer was usually nothing at
+all.
+
+They were found instead by driving many unaccounted numbers **together** while
+**ramping the value**, so a position display animates and a lamp does not. That is
+`ns6 bars` in the driver, and the ranges it produced are narrowed to single numbers
+with `ns6 bars blocks`.
+
 ### One warning about the rest of this map
 
-Every other light here was recorded at **value 127 only**, and 127 was assumed to
-mean "on". The layer indicators show that assumption can be wrong — that a light
-can be a multi-state display in which 127 is simply not the value you want. No
-other light is known to behave that way, but none has been swept through its
-values either, so the possibility is open rather than ruled out.
+Every light in the per-deck and panel-wide tables above was recorded at **value
+127 only**, and 127 was assumed to mean "on". Two separate findings have now shown
+that assumption to be wrong — the layer indicators, where 127 picks the wrong lamp,
+and the position displays, where it picks nothing at all.
 
-### Two messages will take the device off the USB bus
+So "anything not listed was swept and did nothing" is a claim about value 127 and
+not about the message. Any remaining light that reads its value as a state or a
+position is still unfound, and the numbers proven inert are only proven inert at
+full scale. The two entries in the driver's `ns6-displays.toml` marked `nothing`
+are better evidence than the sweep, because they were probed at a value that
+demonstrably shows things.
 
-| Message | |
-|---|---|
-| **CC 57 on channel 1** | confirmed twice |
-| **CC 59 on channel 4** | found by the second sweep, the same way |
+### One message will take the device off the USB bus
 
-Either drops the NS6 off the bus, and it needs a power cycle to come back.
-Neither is a MIDI message as far as the hardware is concerned. The MIDI OUT
+**CC 57** drops the NS6 off the bus on every channel tried, and it needs a power
+cycle to come back. It is not a MIDI message as far as the hardware is concerned.
+The MIDI OUT
 byte stream doubles as a serial register interface into an audio chip — the
 vendor driver clocks bits through it with the byte patterns
 `addr | 0x00/0x40/0x80/0xC0/0xE0` — so some values reach hardware that has
 nothing to do with lighting buttons.
 
-Note that the two are on different channels and different numbers, so they are
-not one register seen twice, and there is no pattern here to extrapolate from.
+A second one, CC 59, was recorded here for a while and was never real. The sweep
+blames whichever candidate was lit when the device vanished, which is a guess;
+sent on its own, CC 59 survives on channel 2 at value 5 and on channel 4 at both
+5 and 127. Verify a suspect by sending it alone before believing it — and note
+that the cost runs both ways, because a number wrongly listed as destructive is
+skipped by every later sweep, which is one way a display stays undiscovered.
+
 Others may exist. Anything not listed above was swept and did nothing, but that
 was with value 127; other values were not tried.
 
