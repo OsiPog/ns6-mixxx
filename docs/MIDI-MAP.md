@@ -270,27 +270,48 @@ indicators, the Serato bar, and — on the deck channels — a strip search bar 
 ring around each platter. Each is a row of LEDs with **one lit at a time**, and
 the CC's value says *which*.
 
-Measured on channel 1, one value at a time:
+**What the value means differs per display**, so it has to be measured rather than
+carried across. Two kinds have turned up so far.
 
-| CC | Dec | Display | Positions |
+**Position** — one LED lit, at position `value`. Panel-wide, so they answer on any
+channel:
+
+| CC | Dec | Display | Range |
 |---|---|---|---|
-| 0x13 | 19 | FX A PARAM indicator | 1–11 |
-| 0x2A | 42 | FX B PARAM indicator | 1–11 |
-| 0x36 | 54 | Serato bar | 1–11 |
+| 0x13 | 19 | FX A PARAM indicator | 1–11 of 11 |
+| 0x2A | 42 | FX B PARAM indicator | 1–11 of 11 |
+| 0x36 | 54 | Serato bar | 1–11 of 11 |
 
-Value **0** lights nothing, **1–11** light that position, and **12 and above light
-nothing** — checked at 12, 20 and 127. Note that it does *not* saturate: unlike
-the layer indicators, where 2, 3 and 127 all select the alternate deck, going past
-the end of one of these displays turns it off rather than pinning it to the last
-LED. Two different rules on the same panel, so neither can be assumed from the
-other.
+Value 0 lights nothing, 1–11 light that position, and 12 upwards light nothing —
+checked at 12, 20 and 127. These do *not* saturate.
 
-**A host that treats these as lamps gets nothing at all.** 0x7F is position 127,
-which is off the end, so the obvious "on" value is indistinguishable from silence.
-That is not a hypothetical — it is why these went unmapped: the sweep that produced
-this document sent every candidate at exactly 127.
+**Fill** — `value` LEDs lit, counting from the start. Addressed per deck side, like
+the other deck lights, so channel 2 is the left deck and channel 3 the right:
 
-To drive one from a 0..1 control, scale to 1..11 and send 0 for "no position".
+| CC | Dec | Display | Range |
+|---|---|---|---|
+| 0x4E | 78 | STRIP SEARCH bar | 1–15 of 15 |
+
+Value 15 lights the whole strip on both decks. That it fills rather than pointing
+is not a guess: the block that found it drove eight numbers and fifteen LEDs came
+on, and eight messages cannot light fifteen segments, so one number is carrying the
+whole strip.
+
+So the panel has at least three value conventions — the layer indicators saturate,
+the position displays go dark past their end, and the strip search fills. None of
+the three can be inferred from the others, which is the argument for measuring each
+one.
+
+**A host that treats any of them as a lamp gets nothing at all.** 0x7F is off the
+end of every one, so the obvious "on" value is indistinguishable from silence. That
+is not hypothetical — it is why these went unmapped: the sweep that produced this
+document sent every candidate at exactly 127.
+
+To drive one from a 0..1 control, scale into its range and send 0 for "nothing".
+
+**Still unfound:** the ring around each platter. It responded during the sweep that
+turned up the others, so it exists and is reachable, but it has not been narrowed to
+a number yet.
 
 ### Why the sweep could not find them
 
