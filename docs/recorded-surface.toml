@@ -831,3 +831,200 @@ description = "deck b strip search"
 messages = [
   { channel = 4, kind = "cc", number = 2 },
 ]
+
+[[control]]
+description = "channel 1 fx a"
+# ch0 note 61 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 61 },
+]
+
+[[control]]
+description = "channel 1 fx b"
+# ch0 note 62 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 62 },
+]
+
+[[control]]
+description = "channel 2 fx a"
+# ch0 note 63 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 63 },
+]
+
+[[control]]
+description = "channel 2 fx b"
+# ch0 note 64 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 64 },
+]
+
+[[control]]
+description = "channel 3 fx a"
+# ch0 note 65 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 65 },
+]
+
+[[control]]
+description = "channel 3 fx b"
+# ch0 note 66 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 66 },
+]
+
+[[control]]
+description = "channel 4 fx a"
+# ch0 note 67 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 67 },
+]
+
+[[control]]
+description = "channel 4 fx b"
+# ch0 note 68 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 68 },
+]
+
+[[control]]
+description = "fx b fx select knob press"
+# ch0 note 48 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 48 },
+]
+
+[[control]]
+description = "scroll knob press"
+# ch0 note 8 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 8 },
+]
+
+[[control]]
+description = "headphone volume knob"
+# ch0 CC 66 (65..127, continuous (partial travel))
+messages = [
+  { channel = 0, kind = "cc", number = 66 },
+]
+
+[[control]]
+description = "headphone blend knob"
+# ch0 CC 18 (30..89, continuous (partial travel)), ch0 CC 50 (8..124, continuous (partial travel))
+messages = [
+  { channel = 0, kind = "cc", number = 18 },
+  { channel = 0, kind = "cc", number = 50 },
+]
+
+[[control]]
+description = "headphones split cue on"
+# ch0 note 0 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 0 },
+]
+
+[[control]]
+description = "channel 1 crossfader assign L"
+# ch0 note 53 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 53 },
+]
+
+[[control]]
+description = "channel 1 crossfader assign R"
+# ch0 note 54 (0..127, button)
+messages = [
+  { channel = 0, kind = "note", number = 54 },
+]
+
+[[control]]
+description = "channel 3 crossfader assign L"
+# ch0 note 57 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 57 },
+]
+
+[[control]]
+description = "channel 3 crossfader assign R"
+# ch0 note 58 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 58 },
+]
+
+[[control]]
+description = "channel 2 crossfader assign L"
+# ch0 note 55 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 55 },
+]
+
+[[control]]
+description = "channel 2 crossfader assign R"
+# ch0 note 56 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 56 },
+]
+
+[[control]]
+description = "channel 4 crossfader assign L"
+# ch0 note 59 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 59 },
+]
+
+[[control]]
+description = "channel 4 crossfader assign R"
+# ch0 note 60 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 60 },
+]
+
+[[control]]
+description = "xfader knob"
+# ch0 CC 85 (56..121, continuous (partial travel))
+messages = [
+  { channel = 0, kind = "cc", number = 85 },
+]
+
+[[control]]
+description = "xfader fader start right ON"
+# ch0 note 3 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 3 },
+]
+
+[[control]]
+description = "xfader fader start left OFF"
+# ch0 note 2 (0..0, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 2 },
+]
+
+[[control]]
+description = "channel 3 switch control to line/mic"
+# ch0 note 73 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 73 },
+]
+
+[[control]]
+description = "channel 1 switch control to line/mic"
+# ch0 note 71 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 71 },
+]
+
+[[control]]
+description = "channel 2 switch to line/mic"
+# ch0 note 72 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 72 },
+]
+
+[[control]]
+description = "channel 4 switch to line/mic"
+# ch0 note 74 (127..127, button (held))
+messages = [
+  { channel = 0, kind = "note", number = 74 },
+]

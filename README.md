@@ -48,11 +48,14 @@ bleep, skip, tap, beat grid, strip search, and the full loop section in both
 Manual and Autoloop modes.
 
 Mixer: four channel faders, four three-band EQs, four gains, four PFL buttons,
-crossfader, master and booth.
+crossfader and its assign switches, master, booth, headphone volume, cue blend,
+split cue and the crossfader contour knob.
 
-Effects: both units — on/off, wet/dry, effect select and parameter.
+Effects: both units — on/off, wet/dry, effect select and parameter, both select
+presses, and FX SEND for all four strips as well as the master.
 
-Navigation: scroll, back/forward, prepare, files, crates, view, and LOAD A/B.
+Navigation: scroll and its press, back/forward, prepare, files, crates, view, and
+LOAD A/B.
 
 **The loop section has two modes**, as on the hardware: MODE switches the four
 numbered buttons between Manual (IN, OUT, SELECT, RELOOP) and Autoloop (1, 2, 4
@@ -169,16 +172,15 @@ channels, was tried. So the mapping follows the button instead of driving it,
 and the light is always right by construction.
 
 
-A handful of controls were never captured and so are not mapped: the eight
-per-channel FX SEND buttons, the FX B select knob's press, the scroll knob's
-press, and three unidentified channel-1 CCs. They are listed in
-[docs/MIDI-MAP.md](docs/MIDI-MAP.md#not-recorded). Everything else on the panel
-is here.
+Every control on the panel is recorded, and everything Mixxx has an equivalent
+for is mapped. Two things are recorded and deliberately not bound, because Mixxx
+has nothing to bind them to: **FADER START**, and the per-strip **LINE / MIC**
+switches. Both are in [docs/MIDI-MAP.md](docs/MIDI-MAP.md) if a use turns up.
 
-Recording them does not mean recording the panel again: `ns6 map` carries over
-everything already in `ns6-surface.toml` and asks only about what is missing, so
-copying [docs/recorded-surface.toml](docs/recorded-surface.toml) in as
-`ns6-surface.toml` and running it leaves just those controls to name.
+The **crossfader assign** switches are worth a note. Each reports two notes for
+three positions — L and R latch on and off, and the middle position is both of
+them off — so the mapping tracks the pair and declares both edges. Declaring only
+note-on would see a switch leave centre and never come back.
 
 One deliberate blank: **LOOP SELECT stays dark in Manual mode.** It is mapped to
 `loop_exit` here and has no state of its own to show. If the hardware's own

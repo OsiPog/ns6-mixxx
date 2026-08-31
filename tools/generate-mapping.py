@@ -65,7 +65,23 @@ STRIPS = {  # mixer channel -> (fader, bass, mid, treble, gain, pfl note)
 
 FX_UNITS = {  # FX unit -> (on/off note, mix msb CC, select CC, select press note, param CC)
     1: (0x2D, 0x57, 0x5A, 0x2E, 0x56),
-    2: (0x2F, 0x59, 0x5B, None, 0x58),
+    2: (0x2F, 0x59, 0x5B, 0x30, 0x58),
+}
+
+# FX SEND per mixer channel, notes 0x3D..0x44: channel 1 A, channel 1 B, channel
+# 2 A, and so on. Derived from the note in NS6.fxSend rather than listed one by
+# one, so this is the first of them.
+FX_SEND_FIRST = 0x3D
+
+# CROSSFADER ASSIGN, one three-position switch per mixer channel. It reports two
+# notes and not three: L and R each latch on and off, and the middle position is
+# both of them off. So neither note alone says where the switch is, and the
+# release carries as much as the press - see NS6.assignLeft.
+XFADER_ASSIGN = {  # mixer channel -> (L note, R note)
+    1: (0x35, 0x36),
+    2: (0x37, 0x38),
+    3: (0x39, 0x3A),
+    4: (0x3B, 0x3C),
 }
 
 
@@ -272,6 +288,25 @@ x.comment(3, "master and booth. 7-bit absolute knobs, not encoders.")
 x.control("[Master]", "gain", 0xB0, 0x43)
 x.control("[Master]", "booth_gain", 0xB0, 0x41)
 
+x.comment(3, "=== Headphones, MIDI channel 1 ===")
+x.control("[Master]", "headGain", 0xB0, 0x42)
+x.comment(3, "CUE BLEND is 14-bit, like the mixer's knobs: LSB 32 above the MSB.")
+x.wide("[Master]", "headMix", 0, 0x12)
+x.comment(3, "SPLIT CUE latches, so it is followed rather than toggled.")
+x.control("[Master]", "NS6.splitCue", 0x90, 0x00, ["script-binding"])
+x.control("[Master]", "NS6.splitCue", 0x80, 0x00, ["script-binding"])
+
+x.comment(3, "The crossfader contour knob. Mixxx keeps the curve in a preference "
+             "rather than per deck, so this writes that.")
+x.control("[Mixer Profile]", "xFaderCurve", 0xB0, 0x55)
+
+x.comment(3, "CROSSFADER ASSIGN. Two notes per channel for three positions, and "
+             "the middle one is both notes off, so both edges are declared.")
+for ch, (left, right) in XFADER_ASSIGN.items():
+    for note, fn in ((left, "assignLeft"), (right, "assignRight")):
+        x.control(f"[Channel{ch}]", f"NS6.{fn}", 0x90, note, ["script-binding"])
+        x.control(f"[Channel{ch}]", f"NS6.{fn}", 0x80, note, ["script-binding"])
+
 x.comment(3, "=== Navigation, MIDI channel 1 ===")
 x.comment(3, "SCROLL KNOB is a relative encoder: 1 = clockwise, 127 = anticlockwise.")
 x.control("[Library]", "MoveVertical", 0xB0, 0x44, ["selectknob"])
@@ -284,6 +319,8 @@ x.control("[Library]", "MoveFocusBackward", 0x90, 0x0B, ["Button"])
 x.control("[Library]", "MoveFocusForward", 0x90, 0x09, ["Button"])
 x.control("[Library]", "GoToItem", 0x90, 0x0A, ["Button"])
 x.control("[Library]", "AutoDjAddBottom", 0x90, 0x0D, ["Button"])
+x.comment(3, "The SCROLL knob's press.")
+x.control("[Library]", "GoToItem", 0x90, 0x08, ["Button"])
 
 x.comment(3, "=== Effects, MIDI channel 1 ===")
 # FX SELECT and FX PARAM are relative encoders, but they cannot use <selectknob/>:
@@ -305,6 +342,11 @@ x.control("[Master]", "NS6.layer", 0x90, 0x05, ["script-binding"])
 x.comment(3, "FX SEND to the master mix, below the MASTER VOLUME knob.")
 x.control("[EffectRack1_EffectUnit1]", "NS6.masterSendA", 0x90, 0x45, ["script-binding"])
 x.control("[EffectRack1_EffectUnit2]", "NS6.masterSendB", 0x90, 0x46, ["script-binding"])
+
+x.comment(3, "FX SEND per mixer channel: A then B, channel 1 through 4. Which "
+             "unit and which channel come from the note, in NS6.fxSend.")
+for i in range(8):
+    x.control("[Master]", "NS6.fxSend", 0x90, FX_SEND_FIRST + i, ["script-binding"])
 
 for d in DECKS:
     ch = d  # deck N is MIDI channel N (0-indexed), i.e. status 0x9N / 0xBN
@@ -330,10 +372,9 @@ for d in DECKS:
     x.comment(3, "LOAD A / LOAD B address a deck and are sent on that deck's channel.")
     x.control(g, "LoadSelectedTrack", 0x90 | ch, 0x0C, ["Button"])
     x.control(g, "LoadSelectedTrack", 0x90 | ch, 0x0E, ["Button"])
-    x.comment(3, "The eight per-channel FX SEND buttons are not mapped, nor is "
-                 "the FX B SELECT knob's press or the SCROLL knob's press: "
-                 "their note numbers were never captured. See "
-                 "docs/MIDI-MAP.md, Not recorded.")
+    x.comment(3, "FADER START and the per-channel line/mic switches are recorded "
+                 "but not mapped: Mixxx has no equivalent of either. See "
+                 "docs/MIDI-MAP.md.")
 
 x.line(2, "</controls>")
 

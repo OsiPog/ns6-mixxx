@@ -244,6 +244,69 @@ NS6.masterSendB = function (c, ctl, value) {
     NS6.flip("[EffectRack1_EffectUnit2]", "group_[Master]_enable", value);
 };
 
+// SPLIT CUE latches in hardware, like PFL, so it is followed rather than
+// toggled - and like PFL its release arrives as a real note-off.
+NS6.splitCue = function (c, ctl, value) {
+    engine.setValue("[Master]", "headSplit", value > 0 ? 1 : 0);
+};
+
+// FX SEND, one button per mixer channel per unit. Which unit and which channel
+// they belong to comes from the note rather than from eight near-identical
+// handlers: the notes run A then B, channel 1 through 4, from NS6.fxSendFirst.
+NS6.fxSendFirst = 0x3D;
+
+NS6.fxSend = function (channel, control, value, status, group) {
+    var i = control - NS6.fxSendFirst;
+    if (i < 0 || i > 7) {
+        return;
+    }
+    var unit = (i % 2) + 1;
+    var mixer = Math.floor(i / 2) + 1;
+    NS6.flip(
+        "[EffectRack1_EffectUnit" + unit + "]",
+        "group_[Channel" + mixer + "]_enable",
+        value
+    );
+};
+
+// --- Crossfader assign -------------------------------------------------------
+
+// One three-position switch per mixer channel, reporting *two* notes: L and R
+// each latch on and off, and the middle position is both of them off. So neither
+// note on its own says where the switch is - only the pair does, which is why
+// both are tracked and why the release matters as much as the press.
+NS6.assigned = {};
+
+NS6.assignState = function (group) {
+    if (NS6.assigned[group] === undefined) {
+        NS6.assigned[group] = { left: false, right: false };
+    }
+    return NS6.assigned[group];
+};
+
+// Mixxx: 0 left, 1 centre, 2 right. Both notes down should not happen on a
+// physical switch, and centre is the honest answer if it ever does.
+NS6.applyAssign = function (group) {
+    var s = NS6.assignState(group);
+    var orientation = 1;
+    if (s.left && !s.right) {
+        orientation = 0;
+    } else if (s.right && !s.left) {
+        orientation = 2;
+    }
+    engine.setValue(group, "orientation", orientation);
+};
+
+NS6.assignLeft = function (c, ctl, value, s, group) {
+    NS6.assignState(group).left = value > 0;
+    NS6.applyAssign(group);
+};
+
+NS6.assignRight = function (c, ctl, value, s, group) {
+    NS6.assignState(group).right = value > 0;
+    NS6.applyAssign(group);
+};
+
 // LOOP ON/OFF. The panel legend is explicit that with no loop set this does
 // nothing, so it is not enough on its own to get a loop going - IN and OUT in
 // Manual mode, or the numbered buttons in Autoloop mode, are what create one.

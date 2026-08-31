@@ -506,6 +506,205 @@
                 <midino>0x41</midino>
                 <options/>
             </control>
+            <!-- === Headphones, MIDI channel 1 === -->
+            <control>
+                <group>[Master]</group>
+                <key>headGain</key>
+                <status>0xB0</status>
+                <midino>0x42</midino>
+                <options/>
+            </control>
+            <!-- CUE BLEND is 14-bit, like the mixer's knobs: LSB 32 above the MSB. -->
+            <control>
+                <group>[Master]</group>
+                <key>headMix</key>
+                <status>0xB0</status>
+                <midino>0x12</midino>
+                <options>
+                    <fourteen-bit-msb/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>headMix</key>
+                <status>0xB0</status>
+                <midino>0x32</midino>
+                <options>
+                    <fourteen-bit-lsb/>
+                </options>
+            </control>
+            <!-- SPLIT CUE latches, so it is followed rather than toggled. -->
+            <control>
+                <group>[Master]</group>
+                <key>NS6.splitCue</key>
+                <status>0x90</status>
+                <midino>0x00</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.splitCue</key>
+                <status>0x80</status>
+                <midino>0x00</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <!-- The crossfader contour knob. Mixxx keeps the curve in a preference rather than per deck, so this writes that. -->
+            <control>
+                <group>[Mixer Profile]</group>
+                <key>xFaderCurve</key>
+                <status>0xB0</status>
+                <midino>0x55</midino>
+                <options/>
+            </control>
+            <!-- CROSSFADER ASSIGN. Two notes per channel for three positions, and the middle one is both notes off, so both edges are declared. -->
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x90</status>
+                <midino>0x35</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x80</status>
+                <midino>0x35</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.assignRight</key>
+                <status>0x90</status>
+                <midino>0x36</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.assignRight</key>
+                <status>0x80</status>
+                <midino>0x36</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x90</status>
+                <midino>0x37</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x80</status>
+                <midino>0x37</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.assignRight</key>
+                <status>0x90</status>
+                <midino>0x38</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.assignRight</key>
+                <status>0x80</status>
+                <midino>0x38</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x90</status>
+                <midino>0x39</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x80</status>
+                <midino>0x39</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.assignRight</key>
+                <status>0x90</status>
+                <midino>0x3A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.assignRight</key>
+                <status>0x80</status>
+                <midino>0x3A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x90</status>
+                <midino>0x3B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.assignLeft</key>
+                <status>0x80</status>
+                <midino>0x3B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.assignRight</key>
+                <status>0x90</status>
+                <midino>0x3C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.assignRight</key>
+                <status>0x80</status>
+                <midino>0x3C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
             <!-- === Navigation, MIDI channel 1 === -->
             <!-- SCROLL KNOB is a relative encoder: 1 = clockwise, 127 = anticlockwise. -->
             <control>
@@ -577,6 +776,16 @@
                 <key>AutoDjAddBottom</key>
                 <status>0x90</status>
                 <midino>0x0D</midino>
+                <options>
+                    <Button/>
+                </options>
+            </control>
+            <!-- The SCROLL knob's press. -->
+            <control>
+                <group>[Library]</group>
+                <key>GoToItem</key>
+                <status>0x90</status>
+                <midino>0x08</midino>
                 <options>
                     <Button/>
                 </options>
@@ -683,6 +892,15 @@
                     <script-binding/>
                 </options>
             </control>
+            <control>
+                <group>[EffectRack1_EffectUnit2_Effect1]</group>
+                <key>NS6.toggleEnabled</key>
+                <status>0x90</status>
+                <midino>0x30</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
             <!-- LAYER. The controller switches channels by itself; script only has to refresh the LEDs, which would otherwise show the outgoing deck until something on the new one happened to change. -->
             <control>
                 <group>[Master]</group>
@@ -717,6 +935,79 @@
                 <key>NS6.masterSendB</key>
                 <status>0x90</status>
                 <midino>0x46</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <!-- FX SEND per mixer channel: A then B, channel 1 through 4. Which unit and which channel come from the note, in NS6.fxSend. -->
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x3D</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x3E</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x3F</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x40</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x41</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x42</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x43</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Master]</group>
+                <key>NS6.fxSend</key>
+                <status>0x90</status>
+                <midino>0x44</midino>
                 <options>
                     <script-binding/>
                 </options>
@@ -1050,7 +1341,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
+            <!-- FADER START and the per-channel line/mic switches are recorded but not mapped: Mixxx has no equivalent of either. See docs/MIDI-MAP.md. -->
             <!-- === Deck 2 - MIDI channel 3 === -->
             <!-- PLATTER: 14-bit absolute position that wraps, so the delta has to be computed in script. -->
             <control>
@@ -1380,7 +1671,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
+            <!-- FADER START and the per-channel line/mic switches are recorded but not mapped: Mixxx has no equivalent of either. See docs/MIDI-MAP.md. -->
             <!-- === Deck 3 - MIDI channel 4 === -->
             <!-- PLATTER: 14-bit absolute position that wraps, so the delta has to be computed in script. -->
             <control>
@@ -1710,7 +2001,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
+            <!-- FADER START and the per-channel line/mic switches are recorded but not mapped: Mixxx has no equivalent of either. See docs/MIDI-MAP.md. -->
             <!-- === Deck 4 - MIDI channel 5 === -->
             <!-- PLATTER: 14-bit absolute position that wraps, so the delta has to be computed in script. -->
             <control>
@@ -2040,7 +2331,7 @@
                     <Button/>
                 </options>
             </control>
-            <!-- The eight per-channel FX SEND buttons are not mapped, nor is the FX B SELECT knob's press or the SCROLL knob's press: their note numbers were never captured. See docs/MIDI-MAP.md, Not recorded. -->
+            <!-- FADER START and the per-channel line/mic switches are recorded but not mapped: Mixxx has no equivalent of either. See docs/MIDI-MAP.md. -->
         </controls>
         <outputs>
             <!-- LEDs are control change, not note on, and their numbers bear no relation to the notes the same buttons send. Recorded from the hardware; see docs/recorded-leds.toml. -->

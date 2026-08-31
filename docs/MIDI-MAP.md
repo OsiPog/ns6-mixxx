@@ -89,9 +89,45 @@ Every fader and knob is 14-bit: the LSB always sits 32 above the MSB.
 | CROSSFADER | CC 7 + CC 39 |
 | MASTER VOLUME | CC 67, 7-bit absolute |
 | BOOTH / ZONE VOLUME | CC 65, 7-bit absolute |
+| HEADPHONE VOLUME | CC 66, 7-bit absolute |
+| CUE BLEND | CC 18 + CC 50, 14-bit |
+| CROSSFADER CONTOUR | CC 85, 7-bit, rests at 64 |
+| SPLIT CUE | note 0x00 (0), latching |
+| FADER START | note 0x02 (2) left, 0x03 (3) right |
 
-Note the gap at CC 18: the strips are otherwise a clean run of five, so
-something sits there unaccounted for. It reports a resting value, so it exists.
+CC 18 is not the odd one out it looks like. The strips are a clean run of five
+each and CC 18 sits in the gap between strips 2 and 3, which reads as a missing
+sixth — but it is the **MSB of CUE BLEND**, whose LSB is 32 above it at CC 50,
+exactly like every other 14-bit control here.
+
+### CROSSFADER ASSIGN
+
+One three-position switch per strip, and it reports **two** notes rather than
+three:
+
+| Strip | L | R |
+|---|---|---|
+| 1 | note 0x35 (53) | 0x36 (54) |
+| 2 | 0x37 (55) | 0x38 (56) |
+| 3 | 0x39 (57) | 0x3A (58) |
+| 4 | 0x3B (59) | 0x3C (60) |
+
+L and R each latch on and off; the **middle position is both notes off**. So
+neither note on its own says where the switch is — only the pair does, and the
+release carries as much information as the press. A mapping that declares only
+note-on sees the switch leave centre and never return to it.
+
+### Per-strip LINE / MIC switch
+
+| Strip | Note |
+|---|---|
+| 1 | 0x47 (71) |
+| 2 | 0x48 (72) |
+| 3 | 0x49 (73) |
+| 4 | 0x4A (74) |
+
+This is the switch behind **"a channel transmits nothing unless its INPUT
+SELECTOR is set to PC"**, below.
 
 **A channel transmits nothing at all unless its INPUT SELECTOR is set to PC.**
 That switch is hardware — if a whole strip looks dead, check it before anything
@@ -108,16 +144,22 @@ position.
 | ON / OFF | note 0x2D (45) | note 0x2F (47) |
 | FX MIX | CC 87 + CC 119 | CC 89 + CC 121 |
 | FX SELECT (encoder) | CC 90 | CC 91 |
-| FX SELECT press | note 0x2E (46) | not recorded |
+| FX SELECT press | note 0x2E (46) | note 0x30 (48) |
 | FX PARAM (encoder) | CC 86 | CC 88 |
 
 FX SEND to the master mix: note 0x45 (69) for A, 0x46 (70) for B.
+
+FX SEND per strip runs A then B, strip 1 through 4, from note 0x3D (61) to 0x44
+(68) — so 61 is strip 1's A, 62 strip 1's B, 63 strip 2's A, and so on. Their
+lights are CC 0x44–0x4B, which do *not* line up with the notes: see the
+panel-wide LED table.
 
 ## Navigation, channel 1
 
 | Control | Message |
 |---|---|
 | SCROLL KNOB | CC 68, relative encoder |
+| SCROLL KNOB press | note 0x08 (8) |
 | BACK | note 0x06 (6) |
 | FWD | note 0x07 (7) |
 | PREPARE | note 0x09 (9) |
@@ -128,16 +170,20 @@ FX SEND to the master mix: note 0x45 (69) for A, 0x46 (70) for B.
 
 ## Not recorded
 
-Honest gaps, rather than guesses:
+Nothing. Every control on the panel is above.
 
-- The eight per-channel **FX SEND** buttons (four strips × A/B). Only the two
-  master ones were captured.
-- **FX B SELECT knob press.**
-- The **SCROLL knob press**.
-- Whatever **CC 18** is.
-- **CC 66** and **CC 85**, both of which report a resting value on channel 1.
-  CC 85 rests at 64, so it is probably something that centres — CUE BLEND on the
-  front panel would fit.
+The last eleven were collected in one sitting once `ns6 map` could resume a
+recording instead of starting the panel over, and they turned out to be
+twenty-eight: the eight per-strip FX SEND buttons, the FX B SELECT and SCROLL
+presses, the crossfader assign and line/mic switches, split cue, fader start,
+headphone volume, cue blend and the crossfader contour knob.
+
+Worth noting how badly the numbering rewards guessing. Notes 53–60 sit as a free
+run of eight immediately after the four PFL buttons, which reads exactly like the
+eight missing FX SENDs; they are the crossfader assign switches, and the FX SENDs
+are at 61–68. CC 85 rests at 64 and so looked like something with a detent, which
+CUE BLEND would have been; it is the crossfader contour, and CUE BLEND is the
+14-bit pair at CC 18 + 50.
 
 ## LEDs
 
