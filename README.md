@@ -131,6 +131,12 @@ over, and stays wrong. But a deck side transmits on the channel of the deck it i
 showing, and the platters report continuously whether or not anyone is touching
 them, so the traffic says which deck it is, over and over. See `NS6.observeDeck`.
 
+The layer indicators themselves are the one place the LED **value** matters: each
+is a pair of lamps, the side's two deck numbers, and the value picks between them
+(1 base, 2 alternate, 0 both dark). The usual 0x7F is wrong — it selects the
+alternate deck whichever one is showing. See
+[docs/MIDI-MAP.md](docs/MIDI-MAP.md#the-layer-indicators-and-why-127-is-the-wrong-value).
+
 Every recorded light is driven. Besides the obvious ones, that means the
 pitch fader's centre detent and its two soft-takeover arrows, the four LOOP
 CONTROL buttons — which follow whichever mode the section is in, so in Autoloop

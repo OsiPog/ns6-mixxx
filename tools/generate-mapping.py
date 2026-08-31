@@ -85,6 +85,13 @@ GLOBAL_LEDS = {
     # Unused, because 0x11 and 0x28 cover every state.
 }
 
+# The layer indicators are not on/off lights. Each is a pair of lamps - the
+# side's two deck numbers - selected by the CC's *value*: 1 for the base deck,
+# 2 (or anything above) for the alternate, 0 for both dark. Sending the usual
+# 0x7F picks the alternate whichever deck is showing. Driven from script, in
+# NS6.sendLayerLed; see docs/MIDI-MAP.md.
+LAYER_LED_VALUES = {"base": 1, "alternate": 2, "dark": 0}
+
 # Per-deck LEDs, sent on the deck side's channel: 2 for the left deck, 3 for
 # the right. Driven from script, so this table is here only for reference; the
 # authoritative copy is in Numark-NS6-scripts.js.

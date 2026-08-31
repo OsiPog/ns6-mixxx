@@ -167,7 +167,9 @@ NS6.shutdown = function () {
         Object.keys(NS6.pitchLeds).forEach(function (key) {
             NS6.sendLed(side.channel, NS6.pitchLeds[key], false);
         });
-        NS6.sendLed(side.channel, side.indicator, false);
+        // 0 is the layer display's "show nothing", which it never does on its
+        // own; deliberate here, because the rest of the panel is going dark too.
+        NS6.sendLedValue(side.channel, side.indicator, 0);
     });
     NS6.drawPanel(false);
 };
@@ -612,7 +614,31 @@ NS6.ledSideFor = function (group) {
 };
 
 NS6.sendLed = function (channel, cc, on) {
-    midi.sendShortMsg(0xB0 | channel, cc, on ? 0x7F : 0x00);
+    NS6.sendLedValue(channel, cc, on ? 0x7F : 0x00);
+};
+
+// Most lights are on or off and 0x7F means on. The layer indicators are not,
+// so the value has to be sayable.
+NS6.sendLedValue = function (channel, cc, value) {
+    midi.sendShortMsg(0xB0 | channel, cc, value);
+};
+
+// The layer indicator is not one lamp but two - a lamp beside each of the
+// side's deck numbers, 1 and 3 on the left, 2 and 4 on the right - and the
+// value picks which of them is lit rather than switching one on. Measured on
+// the hardware:
+//
+//     value 0        both lamps dark
+//     value 1        the side's base deck      (1 on the left, 2 on the right)
+//     value 2 and up the side's alternate deck (3 on the left, 4 on the right)
+//
+// Nothing here may send 0x7F, which is what a light normally gets. It
+// saturates to the alternate deck whichever deck is actually showing, and the
+// 0x00 it pairs with darkens the display entirely - a state the panel never
+// shows by itself, and one that reads as a broken indicator rather than as
+// "deck 1". Both halves of the obvious on/off mapping are wrong.
+NS6.sendLayerLed = function (side) {
+    NS6.sendLedValue(side.channel, side.indicator, side.deck === side.alternate ? 2 : 1);
 };
 
 // --- Lights that are a function of several controls -------------------------
@@ -731,8 +757,8 @@ NS6.connectSide = function (name) {
         led.draw(group);
     });
 
-    // The indicator is lit when the side is showing its alternate layer.
-    NS6.sendLed(side.channel, side.indicator, side.deck === side.alternate);
+    // Which of the side's two deck numbers is lit.
+    NS6.sendLayerLed(side);
 
     // Script-held state does not come from a Mixxx control, so push it here.
     var state = NS6.deckState(group);

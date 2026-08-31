@@ -229,6 +229,48 @@ Both statuses have to be declared, pointing at the same handler.
 | 0x51 | 81 | Layer lamps: left shows 1, right shows 4 |
 | 0x52 | 82 | Layer lamps: left shows 1, right shows 2 |
 
+### The layer indicators, and why 127 is the wrong value
+
+These are the one place in the LED map where the **value carries meaning**, and
+they are worth reading carefully because the obvious mapping is wrong twice over.
+
+There are **four lamps**, not two: one beside each deck number, 1 and 3 on the
+left side and 2 and 4 on the right. So "the left deck is on layer 1" is a lit
+lamp, not the absence of one. Each side's pair is addressed by a single CC whose
+value picks which lamp is lit — measured against the hardware, one value at a
+time:
+
+| Value | CC 0x11 (left) | CC 0x28 (right) |
+|---|---|---|
+| 0 | both lamps dark | both lamps dark |
+| 1 | **1** | **2** |
+| 2 | **3** | **4** |
+| 3 | 3 | 4 |
+| 127 | 3 | 4 |
+
+It saturates rather than wrapping or masking: 2, 3 and 127 all select the
+alternate deck, and only 1 selects the base one. It is not a bitmask — 3 would
+light both lamps if it were, and it lights only the alternate.
+
+So the two CCs are an independent pair, and both sides can be set at once:
+`0x11=1` with `0x28=2` gives left 1 and right 4. There was never a missing fourth
+combination, and 0x50, 0x51 and 0x52 are simply another way to reach the same
+lamps, recorded only at value 127. Nothing needs them.
+
+**A light driven the usual way is broken in both of its states.** Sending 0x7F
+for "on" saturates to the alternate deck whichever deck is really showing, and
+the 0x00 that pairs with it darkens the display completely — a state the panel
+never enters by itself, and one that reads as a dead indicator rather than as
+"deck 1". Send 1 or 2, never 0x7F.
+
+### One warning about the rest of this map
+
+Every other light here was recorded at **value 127 only**, and 127 was assumed to
+mean "on". The layer indicators show that assumption can be wrong — that a light
+can be a multi-state display in which 127 is simply not the value you want. No
+other light is known to behave that way, but none has been swept through its
+values either, so the possibility is open rather than ruled out.
+
 ### Two messages will take the device off the USB bus
 
 | Message | |
