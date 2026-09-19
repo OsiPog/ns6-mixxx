@@ -59,10 +59,15 @@ LOAD A/B.
 
 **The loop section has two modes**, as on the hardware: MODE switches the four
 numbered buttons between Manual (IN, OUT, SELECT, RELOOP) and Autoloop (1, 2, 4
-and 8 beats). The MODE button's own light shows which you are in. Note that LOOP
-ON/OFF does nothing until a loop exists — that is the hardware's behaviour, not
-a gap in the mapping — so make one with IN and OUT, or with a numbered button in
-Autoloop mode, first. Autoloop needs the track to have a beatgrid.
+and 8 beats). The MODE button's own light shows which you are in. Autoloop needs
+the track to have a beatgrid.
+
+**LOOP ON/OFF** turns a running loop off, turns a loop that is set but off back
+on, and with no loop at all makes one: a beatloop of whatever size Mixxx is
+already showing as `beatloop_size`, which is the size the Autoloop buttons set.
+The hardware's own button does nothing until a loop exists — the panel legend
+says so — and this one deliberately does not keep faith with that. Making a
+loop from nothing needs a beatgrid, as Autoloop does.
 
 **SHIFT** is the DELETE CUE / SHIFT button, as on the panel, and it is per deck —
 each deck side has its own, on its own MIDI channel. Held, it changes:
