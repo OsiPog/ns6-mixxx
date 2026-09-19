@@ -179,6 +179,15 @@ NS6.shutdown = function () {
     NS6.globalConnections = [];
     [1, 2].forEach(function (unit) {
         NS6.sendLedValue(0x00, NS6.displays.fxParam[unit], 0);
+        // The effect lights go out with the rest of the panel. As <output>
+        // entries they could not: Mixxx stops driving an output when it closes
+        // the controller but sends nothing to clear it, so whichever were lit
+        // stayed lit, through the shutdown and past it.
+        NS6.sendLed(0x00, NS6.fxLeds.enabled[unit], false);
+        NS6.sendLed(0x00, NS6.fxLeds.master[unit], false);
+        [1, 2, 3, 4].forEach(function (mixer) {
+            NS6.sendLed(0x00, NS6.fxSendLed(unit, mixer), false);
+        });
     });
     NS6.shown = {};
     NS6.drawPanel(false);
@@ -720,6 +729,27 @@ NS6.stateLeds = {
 // rather than being connected to one control each.
 NS6.loopLeds = [0x19, 0x1A, 0x1B, 0x1C];
 
+// The effect lights, panel-wide. These were <output> entries in the mapping,
+// which is where a light with a Mixxx control behind it belongs - but Mixxx
+// pushes an <output>'s first value before it has finished opening the MIDI
+// output, so all twelve went into a closed port and the log filled with "not
+// open for output!". The panel then started blank however the effects were
+// actually set, and stayed that way until something moved. Driving them here
+// puts them behind the same one-shot timer as everything else (see NS6.init),
+// and lets NS6.shutdown put them out rather than leaving them frozen on.
+NS6.fxLeds = {
+    enabled: { 1: 0x17, 2: 0x2E },  // FX A / FX B on-off
+    master: { 1: 0x4C, 2: 0x4D },   // FX SEND to the master mix
+};
+
+// FX SEND per mixer channel: channel 1's A then its B, then channel 2's, and so
+// on, two apart per channel - the same run as the notes, in NS6.fxSend.
+NS6.fxSendLedFirst = 0x44;
+
+NS6.fxSendLed = function (unit, mixer) {
+    return NS6.fxSendLedFirst + (mixer - 1) * 2 + (unit - 1);
+};
+
 // The pitch fader's three lights: centre detent, and the two takeover arrows.
 NS6.pitchLeds = {
     zero: 0x37,
@@ -939,6 +969,31 @@ NS6.connectGlobal = function () {
         });
         connection.trigger();
         NS6.globalConnections.push(connection);
+    });
+
+    // The effect lights. Every one of these is triggered as it is connected, so
+    // the panel comes up showing how Mixxx actually has the effects set rather
+    // than dark - which is the point of moving them out of <outputs>. Mixxx
+    // starts with unit 1 on channel 1 and unit 2 on channel 2, so two of the FX
+    // SEND lights are lit before anything is touched.
+    var connect = function (group, key, cc) {
+        var connection = engine.makeConnection(group, key, function (value) {
+            NS6.sendLed(0x00, cc, value > 0);
+        });
+        connection.trigger();
+        NS6.globalConnections.push(connection);
+    };
+    [1, 2].forEach(function (unit) {
+        var unitGroup = "[EffectRack1_EffectUnit" + unit + "]";
+        var slotGroup = "[EffectRack1_EffectUnit" + unit + "_Effect1]";
+        // FX A / FX B on-off follows the effect in slot 1, which is what the
+        // button sets: the unit group has no "enabled" control in Mixxx 2.5.
+        connect(slotGroup, "enabled", NS6.fxLeds.enabled[unit]);
+        [1, 2, 3, 4].forEach(function (mixer) {
+            connect(unitGroup, "group_[Channel" + mixer + "]_enable",
+                    NS6.fxSendLed(unit, mixer));
+        });
+        connect(unitGroup, "group_[Master]_enable", NS6.fxLeds.master[unit]);
     });
 };
 

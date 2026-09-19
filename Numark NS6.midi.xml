@@ -793,7 +793,7 @@
             <!-- === Effects, MIDI channel 1 === -->
             <!-- FX A maps to EffectUnit1 -->
             <control>
-                <group>[EffectRack1_EffectUnit1]</group>
+                <group>[EffectRack1_EffectUnit1_Effect1]</group>
                 <key>NS6.toggleEnabled</key>
                 <status>0x90</status>
                 <midino>0x2D</midino>
@@ -848,7 +848,7 @@
             </control>
             <!-- FX B maps to EffectUnit2 -->
             <control>
-                <group>[EffectRack1_EffectUnit2]</group>
+                <group>[EffectRack1_EffectUnit2_Effect1]</group>
                 <key>NS6.toggleEnabled</key>
                 <status>0x90</status>
                 <midino>0x2F</midino>
@@ -2334,105 +2334,9 @@
             <!-- FADER START and the per-channel line/mic switches are recorded but not mapped: Mixxx has no equivalent of either. See docs/MIDI-MAP.md. -->
         </controls>
         <outputs>
-            <!-- LEDs are control change, not note on, and their numbers bear no relation to the notes the same buttons send. Recorded from the hardware; see docs/recorded-leds.toml. -->
-            <!-- Only the panel-wide lights are here. The per-deck ones are driven from script, because they are addressed by physical deck side - channel 2 is the left deck whichever layer it is on - and Mixxx controls are per deck, so something has to route between them. -->
-            <output>
-                <group>[EffectRack1_EffectUnit1]</group>
-                <key>enabled</key>
-                <status>0xB0</status>
-                <midino>0x17</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit2]</group>
-                <key>enabled</key>
-                <status>0xB0</status>
-                <midino>0x2E</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <!-- FX SEND, per mixer channel and for the master mix. -->
-            <output>
-                <group>[EffectRack1_EffectUnit1]</group>
-                <key>group_[Channel1]_enable</key>
-                <status>0xB0</status>
-                <midino>0x44</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit2]</group>
-                <key>group_[Channel1]_enable</key>
-                <status>0xB0</status>
-                <midino>0x45</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit1]</group>
-                <key>group_[Channel2]_enable</key>
-                <status>0xB0</status>
-                <midino>0x46</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit2]</group>
-                <key>group_[Channel2]_enable</key>
-                <status>0xB0</status>
-                <midino>0x47</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit1]</group>
-                <key>group_[Channel3]_enable</key>
-                <status>0xB0</status>
-                <midino>0x48</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit2]</group>
-                <key>group_[Channel3]_enable</key>
-                <status>0xB0</status>
-                <midino>0x49</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit1]</group>
-                <key>group_[Channel4]_enable</key>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit2]</group>
-                <key>group_[Channel4]_enable</key>
-                <status>0xB0</status>
-                <midino>0x4B</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit1]</group>
-                <key>group_[Master]_enable</key>
-                <status>0xB0</status>
-                <midino>0x4C</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
-            <output>
-                <group>[EffectRack1_EffectUnit2]</group>
-                <key>group_[Master]_enable</key>
-                <status>0xB0</status>
-                <midino>0x4D</midino>
-                <on>0x7F</on>
-                <off>0x00</off>
-            </output>
+            <!-- Empty, and deliberately so. Every light on this unit is driven from script - see NS6.connectSide and NS6.connectGlobal. -->
+            <!-- The per-deck ones have to be: they are addressed by physical deck side - channel 2 is the left deck whichever layer it is on - and Mixxx controls are per deck, so something has to route between them. -->
+            <!-- The effect lights were &lt;output&gt; entries until they turned out to need the same treatment for a different reason. Mixxx pushes an output's first value before it has finished opening the MIDI output, so all twelve went into a closed port and the panel came up blank however the effects were set; and on the way out Mixxx stops driving an output without clearing it, so whichever were lit stayed lit past shutdown. Script gets the deferred first draw and the blanking that fixes both. -->
         </outputs>
     </controller>
 </MixxxControllerPreset>

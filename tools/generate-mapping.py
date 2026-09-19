@@ -85,12 +85,18 @@ XFADER_ASSIGN = {  # mixer channel -> (L note, R note)
 }
 
 
-# Panel-wide LEDs, channel 1. Recorded from the hardware.
+# Panel-wide LEDs, channel 1. Recorded from the hardware. Driven from script, so
+# this table is here only for reference; the authoritative copy is in
+# Numark-NS6-scripts.js - NS6.navLeds for the three navigation lamps, NS6.fxLeds
+# and NS6.fxSendLed for the effects, NS6.sides for the layer indicators.
+#
+# The effects lights were <output> entries until they were moved; see the note
+# above the empty <outputs> section for why.
 GLOBAL_LEDS = {
     "crates": 0x03,
     "prepare": 0x04,
     "files": 0x05,
-    "fx1": 0x17,       # FX A on/off
+    "fx1": 0x17,       # FX A on/off, following the effect in slot 1
     "fx2": 0x2E,       # FX B on/off
     "layer_a": 0x11,   # lit when the left deck is on layer 3
     "layer_b": 0x28,   # lit when the right deck is on layer 4
@@ -327,7 +333,12 @@ x.comment(3, "=== Effects, MIDI channel 1 ===")
 # that option is an accumulator, and neither control wants one. See NS6.fxSelect.
 for unit, (onoff, mix, sel, sel_press, param) in FX_UNITS.items():
     x.comment(3, f"FX {chr(64 + unit)} maps to EffectUnit{unit}")
-    x.control(f"[EffectRack1_EffectUnit{unit}]", "NS6.toggleEnabled", 0x90, onoff, ["script-binding"])
+    # FX ON/OFF drives the effect in slot 1, not the unit. The unit group has no
+    # "enabled" control in Mixxx 2.5 - the effects rework left the unit with
+    # routing (group_[ChannelN]_enable) and mix, and moved on/off down to the
+    # slot. Writing the old name is silently ignored, which is what made this
+    # button dead: every press read 0, wrote 1, and changed nothing.
+    x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.toggleEnabled", 0x90, onoff, ["script-binding"])
     x.wide(f"[EffectRack1_EffectUnit{unit}]", "mix", 0, mix)
     x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.fxSelect", 0xB0, sel, ["script-binding"])
     x.control(f"[EffectRack1_EffectUnit{unit}_Effect1]", "NS6.fxParam", 0xB0, param, ["script-binding"])
@@ -379,27 +390,20 @@ for d in DECKS:
 x.line(2, "</controls>")
 
 x.line(2, "<outputs>")
-x.comment(3, "LEDs are control change, not note on, and their numbers bear no "
-             "relation to the notes the same buttons send. Recorded from the "
-             "hardware; see docs/recorded-leds.toml.")
-x.comment(3, "Only the panel-wide lights are here. The per-deck ones are driven "
-             "from script, because they are addressed by physical deck side - "
-             "channel 2 is the left deck whichever layer it is on - and Mixxx "
-             "controls are per deck, so something has to route between them.")
-for unit, (onoff, _, _, _, _) in FX_UNITS.items():
-    x.output(f"[EffectRack1_EffectUnit{unit}]", "enabled", 0xB0, GLOBAL_LEDS[f"fx{unit}"])
-x.comment(3, "FX SEND, per mixer channel and for the master mix.")
-for ch in STRIPS:
-    x.output(
-        "[EffectRack1_EffectUnit1]", f"group_[Channel{ch}]_enable", 0xB0,
-        GLOBAL_LEDS["send_a"] + (ch - 1) * 2,
-    )
-    x.output(
-        "[EffectRack1_EffectUnit2]", f"group_[Channel{ch}]_enable", 0xB0,
-        GLOBAL_LEDS["send_a"] + (ch - 1) * 2 + 1,
-    )
-x.output("[EffectRack1_EffectUnit1]", "group_[Master]_enable", 0xB0, GLOBAL_LEDS["master_a"])
-x.output("[EffectRack1_EffectUnit2]", "group_[Master]_enable", 0xB0, GLOBAL_LEDS["master_b"])
+x.comment(3, "Empty, and deliberately so. Every light on this unit is driven "
+             "from script - see NS6.connectSide and NS6.connectGlobal.")
+x.comment(3, "The per-deck ones have to be: they are addressed by physical deck "
+             "side - channel 2 is the left deck whichever layer it is on - and "
+             "Mixxx controls are per deck, so something has to route between "
+             "them.")
+x.comment(3, "The effect lights were <output> entries until they turned out to "
+             "need the same treatment for a different reason. Mixxx pushes an "
+             "output's first value before it has finished opening the MIDI "
+             "output, so all twelve went into a closed port and the panel came "
+             "up blank however the effects were set; and on the way out Mixxx "
+             "stops driving an output without clearing it, so whichever were "
+             "lit stayed lit past shutdown. Script gets the deferred first draw "
+             "and the blanking that fixes both.")
 x.line(2, "</outputs>")
 
 x.line(1, "</controller>")
