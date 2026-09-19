@@ -29,6 +29,9 @@ DECK_BUTTONS = {
 # they latch. A latching control cannot use <Button>, which sets 1 on press and
 # 0 on release - a full press then nets to no change, and the button appears to
 # need pressing twice.
+#
+# Every one of these is emitted twice, on 0x9N and on 0x8N, because the release
+# arrives as a real note-off. See the comment at the emit loop below.
 DECK_SCRIPT_BUTTONS = {
     0x12: "shift",           # DELETE CUE / SHIFT; double-clicked, moves the
                              # hot cue bank between cues 1-5 and 6-10
@@ -383,8 +386,19 @@ for d in DECKS:
     x.control(g, "NS6.stripSearch", 0xB0 | ch, 0x02, ["script-binding"])
     for note, (key, opts) in sorted(DECK_BUTTONS.items()):
         x.control(g, key, 0x90 | ch, note, opts)
+    x.comment(3, "Both edges of every one of these. The hardware sends a real "
+                 "note-off on release - captured on the wire, 0x81 note 18 "
+                 "follows 0x91 note 18 when DELETE CUE / SHIFT is let go - and "
+                 "Mixxx matches on the status byte, so declaring only 0x9N "
+                 "takes the presses and silently drops the releases. On a "
+                 "button that means something only while held that is fatal: "
+                 "SHIFT never sees its release and the shift layer latches on "
+                 "for good, which turns every hot cue press into a delete. The "
+                 "handlers that do not want the release already return on "
+                 "value 0, so this is safe for all of them.")
     for note, fn in sorted(DECK_SCRIPT_BUTTONS.items()):
         x.control(g, f"NS6.{fn}", 0x90 | ch, note, ["script-binding"])
+        x.control(g, f"NS6.{fn}", 0x80 | ch, note, ["script-binding"])
     x.comment(3, "LOAD A / LOAD B address a deck and are sent on that deck's channel.")
     x.control(g, "LoadSelectedTrack", 0x90 | ch, 0x0C, ["Button"])
     x.control(g, "LoadSelectedTrack", 0x90 | ch, 0x0E, ["Button"])

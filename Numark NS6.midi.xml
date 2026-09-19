@@ -1124,10 +1124,20 @@
                     <Button/>
                 </options>
             </control>
+            <!-- Both edges of every one of these. The hardware sends a real note-off on release - captured on the wire, 0x81 note 18 follows 0x91 note 18 when DELETE CUE / SHIFT is let go - and Mixxx matches on the status byte, so declaring only 0x9N takes the presses and silently drops the releases. On a button that means something only while held that is fatal: SHIFT never sees its release and the shift layer latches on for good, which turns every hot cue press into a delete. The handlers that do not want the release already return on value 0, so this is safe for all of them. -->
             <control>
                 <group>[Channel1]</group>
                 <key>NS6.shift</key>
                 <status>0x91</status>
+                <midino>0x12</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.shift</key>
+                <status>0x81</status>
                 <midino>0x12</midino>
                 <options>
                     <script-binding/>
@@ -1144,8 +1154,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.hotcue1</key>
+                <status>0x81</status>
+                <midino>0x13</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.hotcue2</key>
                 <status>0x91</status>
+                <midino>0x14</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.hotcue2</key>
+                <status>0x81</status>
                 <midino>0x14</midino>
                 <options>
                     <script-binding/>
@@ -1162,8 +1190,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.hotcue3</key>
+                <status>0x81</status>
+                <midino>0x15</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.hotcue4</key>
                 <status>0x91</status>
+                <midino>0x16</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.hotcue4</key>
+                <status>0x81</status>
                 <midino>0x16</midino>
                 <options>
                     <script-binding/>
@@ -1180,8 +1226,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.hotcue5</key>
+                <status>0x81</status>
+                <midino>0x17</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.pitchRange</key>
                 <status>0x91</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.pitchRange</key>
+                <status>0x81</status>
                 <midino>0x1A</midino>
                 <options>
                     <script-binding/>
@@ -1198,8 +1262,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.keylock</key>
+                <status>0x81</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.reverse</key>
                 <status>0x91</status>
+                <midino>0x1C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.reverse</key>
+                <status>0x81</status>
                 <midino>0x1C</midino>
                 <options>
                     <script-binding/>
@@ -1216,8 +1298,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.skip</key>
+                <status>0x81</status>
+                <midino>0x1D</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.beatgridAdjust</key>
                 <status>0x91</status>
+                <midino>0x20</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.beatgridAdjust</key>
+                <status>0x81</status>
                 <midino>0x20</midino>
                 <options>
                     <script-binding/>
@@ -1234,8 +1334,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.scratchMode</key>
+                <status>0x81</status>
+                <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.loopHalve</key>
                 <status>0x91</status>
+                <midino>0x22</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.loopHalve</key>
+                <status>0x81</status>
                 <midino>0x22</midino>
                 <options>
                     <script-binding/>
@@ -1252,8 +1370,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.loopDouble</key>
+                <status>0x81</status>
+                <midino>0x23</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.loopToggle</key>
                 <status>0x91</status>
+                <midino>0x24</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x81</status>
                 <midino>0x24</midino>
                 <options>
                     <script-binding/>
@@ -1270,8 +1406,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.loopShiftLeft</key>
+                <status>0x81</status>
+                <midino>0x25</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.loopShiftRight</key>
                 <status>0x91</status>
+                <midino>0x26</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.loopShiftRight</key>
+                <status>0x81</status>
                 <midino>0x26</midino>
                 <options>
                     <script-binding/>
@@ -1288,8 +1442,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.loopMode</key>
+                <status>0x81</status>
+                <midino>0x27</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.loopButton1</key>
                 <status>0x91</status>
+                <midino>0x28</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.loopButton1</key>
+                <status>0x81</status>
                 <midino>0x28</midino>
                 <options>
                     <script-binding/>
@@ -1306,6 +1478,15 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.loopButton2</key>
+                <status>0x81</status>
+                <midino>0x29</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.loopButton3</key>
                 <status>0x91</status>
                 <midino>0x2A</midino>
@@ -1315,8 +1496,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>NS6.loopButton3</key>
+                <status>0x81</status>
+                <midino>0x2A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>NS6.loopButton4</key>
                 <status>0x91</status>
+                <midino>0x2B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>NS6.loopButton4</key>
+                <status>0x81</status>
                 <midino>0x2B</midino>
                 <options>
                     <script-binding/>
@@ -1454,10 +1653,20 @@
                     <Button/>
                 </options>
             </control>
+            <!-- Both edges of every one of these. The hardware sends a real note-off on release - captured on the wire, 0x81 note 18 follows 0x91 note 18 when DELETE CUE / SHIFT is let go - and Mixxx matches on the status byte, so declaring only 0x9N takes the presses and silently drops the releases. On a button that means something only while held that is fatal: SHIFT never sees its release and the shift layer latches on for good, which turns every hot cue press into a delete. The handlers that do not want the release already return on value 0, so this is safe for all of them. -->
             <control>
                 <group>[Channel2]</group>
                 <key>NS6.shift</key>
                 <status>0x92</status>
+                <midino>0x12</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.shift</key>
+                <status>0x82</status>
                 <midino>0x12</midino>
                 <options>
                     <script-binding/>
@@ -1474,8 +1683,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.hotcue1</key>
+                <status>0x82</status>
+                <midino>0x13</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.hotcue2</key>
                 <status>0x92</status>
+                <midino>0x14</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.hotcue2</key>
+                <status>0x82</status>
                 <midino>0x14</midino>
                 <options>
                     <script-binding/>
@@ -1492,8 +1719,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.hotcue3</key>
+                <status>0x82</status>
+                <midino>0x15</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.hotcue4</key>
                 <status>0x92</status>
+                <midino>0x16</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.hotcue4</key>
+                <status>0x82</status>
                 <midino>0x16</midino>
                 <options>
                     <script-binding/>
@@ -1510,8 +1755,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.hotcue5</key>
+                <status>0x82</status>
+                <midino>0x17</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.pitchRange</key>
                 <status>0x92</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.pitchRange</key>
+                <status>0x82</status>
                 <midino>0x1A</midino>
                 <options>
                     <script-binding/>
@@ -1528,8 +1791,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.keylock</key>
+                <status>0x82</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.reverse</key>
                 <status>0x92</status>
+                <midino>0x1C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.reverse</key>
+                <status>0x82</status>
                 <midino>0x1C</midino>
                 <options>
                     <script-binding/>
@@ -1546,8 +1827,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.skip</key>
+                <status>0x82</status>
+                <midino>0x1D</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.beatgridAdjust</key>
                 <status>0x92</status>
+                <midino>0x20</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.beatgridAdjust</key>
+                <status>0x82</status>
                 <midino>0x20</midino>
                 <options>
                     <script-binding/>
@@ -1564,8 +1863,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.scratchMode</key>
+                <status>0x82</status>
+                <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.loopHalve</key>
                 <status>0x92</status>
+                <midino>0x22</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.loopHalve</key>
+                <status>0x82</status>
                 <midino>0x22</midino>
                 <options>
                     <script-binding/>
@@ -1582,8 +1899,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.loopDouble</key>
+                <status>0x82</status>
+                <midino>0x23</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.loopToggle</key>
                 <status>0x92</status>
+                <midino>0x24</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x82</status>
                 <midino>0x24</midino>
                 <options>
                     <script-binding/>
@@ -1600,8 +1935,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.loopShiftLeft</key>
+                <status>0x82</status>
+                <midino>0x25</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.loopShiftRight</key>
                 <status>0x92</status>
+                <midino>0x26</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.loopShiftRight</key>
+                <status>0x82</status>
                 <midino>0x26</midino>
                 <options>
                     <script-binding/>
@@ -1618,8 +1971,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.loopMode</key>
+                <status>0x82</status>
+                <midino>0x27</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.loopButton1</key>
                 <status>0x92</status>
+                <midino>0x28</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.loopButton1</key>
+                <status>0x82</status>
                 <midino>0x28</midino>
                 <options>
                     <script-binding/>
@@ -1636,6 +2007,15 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.loopButton2</key>
+                <status>0x82</status>
+                <midino>0x29</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.loopButton3</key>
                 <status>0x92</status>
                 <midino>0x2A</midino>
@@ -1645,8 +2025,26 @@
             </control>
             <control>
                 <group>[Channel2]</group>
+                <key>NS6.loopButton3</key>
+                <status>0x82</status>
+                <midino>0x2A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
                 <key>NS6.loopButton4</key>
                 <status>0x92</status>
+                <midino>0x2B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>NS6.loopButton4</key>
+                <status>0x82</status>
                 <midino>0x2B</midino>
                 <options>
                     <script-binding/>
@@ -1784,10 +2182,20 @@
                     <Button/>
                 </options>
             </control>
+            <!-- Both edges of every one of these. The hardware sends a real note-off on release - captured on the wire, 0x81 note 18 follows 0x91 note 18 when DELETE CUE / SHIFT is let go - and Mixxx matches on the status byte, so declaring only 0x9N takes the presses and silently drops the releases. On a button that means something only while held that is fatal: SHIFT never sees its release and the shift layer latches on for good, which turns every hot cue press into a delete. The handlers that do not want the release already return on value 0, so this is safe for all of them. -->
             <control>
                 <group>[Channel3]</group>
                 <key>NS6.shift</key>
                 <status>0x93</status>
+                <midino>0x12</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.shift</key>
+                <status>0x83</status>
                 <midino>0x12</midino>
                 <options>
                     <script-binding/>
@@ -1804,8 +2212,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.hotcue1</key>
+                <status>0x83</status>
+                <midino>0x13</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.hotcue2</key>
                 <status>0x93</status>
+                <midino>0x14</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.hotcue2</key>
+                <status>0x83</status>
                 <midino>0x14</midino>
                 <options>
                     <script-binding/>
@@ -1822,8 +2248,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.hotcue3</key>
+                <status>0x83</status>
+                <midino>0x15</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.hotcue4</key>
                 <status>0x93</status>
+                <midino>0x16</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.hotcue4</key>
+                <status>0x83</status>
                 <midino>0x16</midino>
                 <options>
                     <script-binding/>
@@ -1840,8 +2284,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.hotcue5</key>
+                <status>0x83</status>
+                <midino>0x17</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.pitchRange</key>
                 <status>0x93</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.pitchRange</key>
+                <status>0x83</status>
                 <midino>0x1A</midino>
                 <options>
                     <script-binding/>
@@ -1858,8 +2320,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.keylock</key>
+                <status>0x83</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.reverse</key>
                 <status>0x93</status>
+                <midino>0x1C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.reverse</key>
+                <status>0x83</status>
                 <midino>0x1C</midino>
                 <options>
                     <script-binding/>
@@ -1876,8 +2356,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.skip</key>
+                <status>0x83</status>
+                <midino>0x1D</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.beatgridAdjust</key>
                 <status>0x93</status>
+                <midino>0x20</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.beatgridAdjust</key>
+                <status>0x83</status>
                 <midino>0x20</midino>
                 <options>
                     <script-binding/>
@@ -1894,8 +2392,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.scratchMode</key>
+                <status>0x83</status>
+                <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.loopHalve</key>
                 <status>0x93</status>
+                <midino>0x22</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.loopHalve</key>
+                <status>0x83</status>
                 <midino>0x22</midino>
                 <options>
                     <script-binding/>
@@ -1912,8 +2428,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.loopDouble</key>
+                <status>0x83</status>
+                <midino>0x23</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.loopToggle</key>
                 <status>0x93</status>
+                <midino>0x24</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x83</status>
                 <midino>0x24</midino>
                 <options>
                     <script-binding/>
@@ -1930,8 +2464,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.loopShiftLeft</key>
+                <status>0x83</status>
+                <midino>0x25</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.loopShiftRight</key>
                 <status>0x93</status>
+                <midino>0x26</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.loopShiftRight</key>
+                <status>0x83</status>
                 <midino>0x26</midino>
                 <options>
                     <script-binding/>
@@ -1948,8 +2500,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.loopMode</key>
+                <status>0x83</status>
+                <midino>0x27</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.loopButton1</key>
                 <status>0x93</status>
+                <midino>0x28</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.loopButton1</key>
+                <status>0x83</status>
                 <midino>0x28</midino>
                 <options>
                     <script-binding/>
@@ -1966,6 +2536,15 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.loopButton2</key>
+                <status>0x83</status>
+                <midino>0x29</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.loopButton3</key>
                 <status>0x93</status>
                 <midino>0x2A</midino>
@@ -1975,8 +2554,26 @@
             </control>
             <control>
                 <group>[Channel3]</group>
+                <key>NS6.loopButton3</key>
+                <status>0x83</status>
+                <midino>0x2A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
                 <key>NS6.loopButton4</key>
                 <status>0x93</status>
+                <midino>0x2B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel3]</group>
+                <key>NS6.loopButton4</key>
+                <status>0x83</status>
                 <midino>0x2B</midino>
                 <options>
                     <script-binding/>
@@ -2114,10 +2711,20 @@
                     <Button/>
                 </options>
             </control>
+            <!-- Both edges of every one of these. The hardware sends a real note-off on release - captured on the wire, 0x81 note 18 follows 0x91 note 18 when DELETE CUE / SHIFT is let go - and Mixxx matches on the status byte, so declaring only 0x9N takes the presses and silently drops the releases. On a button that means something only while held that is fatal: SHIFT never sees its release and the shift layer latches on for good, which turns every hot cue press into a delete. The handlers that do not want the release already return on value 0, so this is safe for all of them. -->
             <control>
                 <group>[Channel4]</group>
                 <key>NS6.shift</key>
                 <status>0x94</status>
+                <midino>0x12</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.shift</key>
+                <status>0x84</status>
                 <midino>0x12</midino>
                 <options>
                     <script-binding/>
@@ -2134,8 +2741,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.hotcue1</key>
+                <status>0x84</status>
+                <midino>0x13</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.hotcue2</key>
                 <status>0x94</status>
+                <midino>0x14</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.hotcue2</key>
+                <status>0x84</status>
                 <midino>0x14</midino>
                 <options>
                     <script-binding/>
@@ -2152,8 +2777,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.hotcue3</key>
+                <status>0x84</status>
+                <midino>0x15</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.hotcue4</key>
                 <status>0x94</status>
+                <midino>0x16</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.hotcue4</key>
+                <status>0x84</status>
                 <midino>0x16</midino>
                 <options>
                     <script-binding/>
@@ -2170,8 +2813,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.hotcue5</key>
+                <status>0x84</status>
+                <midino>0x17</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.pitchRange</key>
                 <status>0x94</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.pitchRange</key>
+                <status>0x84</status>
                 <midino>0x1A</midino>
                 <options>
                     <script-binding/>
@@ -2188,8 +2849,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.keylock</key>
+                <status>0x84</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.reverse</key>
                 <status>0x94</status>
+                <midino>0x1C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.reverse</key>
+                <status>0x84</status>
                 <midino>0x1C</midino>
                 <options>
                     <script-binding/>
@@ -2206,8 +2885,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.skip</key>
+                <status>0x84</status>
+                <midino>0x1D</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.beatgridAdjust</key>
                 <status>0x94</status>
+                <midino>0x20</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.beatgridAdjust</key>
+                <status>0x84</status>
                 <midino>0x20</midino>
                 <options>
                     <script-binding/>
@@ -2224,8 +2921,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.scratchMode</key>
+                <status>0x84</status>
+                <midino>0x21</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.loopHalve</key>
                 <status>0x94</status>
+                <midino>0x22</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.loopHalve</key>
+                <status>0x84</status>
                 <midino>0x22</midino>
                 <options>
                     <script-binding/>
@@ -2242,8 +2957,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.loopDouble</key>
+                <status>0x84</status>
+                <midino>0x23</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.loopToggle</key>
                 <status>0x94</status>
+                <midino>0x24</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.loopToggle</key>
+                <status>0x84</status>
                 <midino>0x24</midino>
                 <options>
                     <script-binding/>
@@ -2260,8 +2993,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.loopShiftLeft</key>
+                <status>0x84</status>
+                <midino>0x25</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.loopShiftRight</key>
                 <status>0x94</status>
+                <midino>0x26</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.loopShiftRight</key>
+                <status>0x84</status>
                 <midino>0x26</midino>
                 <options>
                     <script-binding/>
@@ -2278,8 +3029,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.loopMode</key>
+                <status>0x84</status>
+                <midino>0x27</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.loopButton1</key>
                 <status>0x94</status>
+                <midino>0x28</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.loopButton1</key>
+                <status>0x84</status>
                 <midino>0x28</midino>
                 <options>
                     <script-binding/>
@@ -2296,6 +3065,15 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.loopButton2</key>
+                <status>0x84</status>
+                <midino>0x29</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.loopButton3</key>
                 <status>0x94</status>
                 <midino>0x2A</midino>
@@ -2305,8 +3083,26 @@
             </control>
             <control>
                 <group>[Channel4]</group>
+                <key>NS6.loopButton3</key>
+                <status>0x84</status>
+                <midino>0x2A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
                 <key>NS6.loopButton4</key>
                 <status>0x94</status>
+                <midino>0x2B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel4]</group>
+                <key>NS6.loopButton4</key>
+                <status>0x84</status>
                 <midino>0x2B</midino>
                 <options>
                     <script-binding/>
