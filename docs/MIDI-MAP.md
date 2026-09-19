@@ -232,11 +232,13 @@ A useful shortcut: if a button's LED appears in the map below, it is host-driven
 and the button is momentary. If it does not, the device owns both the light and
 the state.
 
-One practical trap when following a latching button: its "off" arrives as a MIDI
-**note-off**, status `0x80`, not as a note-on with velocity zero. Mixxx matches
-on the status byte, so a mapping that declares only `0x90` receives the presses
-and silently drops the releases — cueing can then be switched on but never off.
-Both statuses have to be declared, pointing at the same handler.
+One practical trap covers both kinds: the "off" edge arrives as a MIDI
+**note-off**, status `0x8N`, not as a note-on with velocity zero. Mixxx matches
+on the status byte, so a mapping that declares only `0x9N` receives the presses
+and silently drops the releases — cueing can then be switched on but never off,
+and a button that means something only while held, like DELETE CUE / SHIFT,
+latches its layer on for good. Both statuses have to be declared, pointing at
+the same handler.
 
 ### Per deck — channel 2 (left) or 3 (right)
 
