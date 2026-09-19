@@ -30,7 +30,8 @@ DECK_BUTTONS = {
 # 0 on release - a full press then nets to no change, and the button appears to
 # need pressing twice.
 DECK_SCRIPT_BUTTONS = {
-    0x12: "shift",           # DELETE CUE / SHIFT
+    0x12: "shift",           # DELETE CUE / SHIFT; double-clicked, moves the
+                             # hot cue bank between cues 1-5 and 6-10
     0x1B: "keylock",         # latching: toggled on press only
     0x24: "loopToggle",      # latching
     0x13: "hotcue1",
@@ -131,6 +132,10 @@ DISPLAYS = {
 # Per-deck LEDs, sent on the deck side's channel: 2 for the left deck, 3 for
 # the right. Driven from script, so this table is here only for reference; the
 # authoritative copy is in Numark-NS6-scripts.js.
+#
+# The five hot cue lamps are the numbers of the *buttons*, not of any fixed cue.
+# Which cue each one follows depends on the deck's bank - see NS6.hotcueLeds,
+# which is why they are not in NS6.deckLeds with the rest.
 DECK_LEDS = {
     "sync_enabled": 0x07,
     "cue_indicator": 0x08,

@@ -83,6 +83,15 @@ NS6.deckState = function (group) {
     if (NS6.decks[group] === undefined) {
         NS6.decks[group] = {
             shift: false,
+            // Bookkeeping for the double-click of SHIFT that moves the hot cue
+            // bank; see NS6.shift.
+            shiftTapPending: false,
+            shiftTapTimer: null,
+            shiftUsed: false,
+            // Which five of the deck's hot cues the five buttons reach: 0 for
+            // cues 1-5, 1 for 6-10. The panel has five hot cue buttons and no
+            // pad grid, so a bank is the only way past five cues.
+            hotcueBank: 0,
             // The platter is a motorised turntable: scratching is off until the
             // SCRATCH button turns it on, exactly as the hardware behaves.
             scratching: false,
@@ -149,6 +158,13 @@ NS6.shutdown = function () {
         if (NS6.decks[group].scratching) {
             engine.scratchDisable(script.deckFromGroup(group));
         }
+        // A SHIFT press within the last third of a second leaves a timer still
+        // waiting to say the double-click window has closed.
+        if (NS6.decks[group].shiftTapTimer !== null) {
+            engine.stopTimer(NS6.decks[group].shiftTapTimer);
+            NS6.decks[group].shiftTapTimer = null;
+            NS6.decks[group].shiftTapPending = false;
+        }
     }
     // Leave the panel dark rather than frozen on the last state.
     ["A", "B"].forEach(function (name) {
@@ -156,8 +172,14 @@ NS6.shutdown = function () {
         NS6.connections[name].forEach(function (c) {
             c.disconnect();
         });
+        NS6.hotcueConnections[name].forEach(function (c) {
+            c.disconnect();
+        });
         Object.keys(NS6.deckLeds).forEach(function (key) {
             NS6.sendLed(side.channel, NS6.deckLeds[key], false);
+        });
+        NS6.hotcueLeds.forEach(function (cc) {
+            NS6.sendLed(side.channel, cc, false);
         });
         Object.keys(NS6.stateLeds).forEach(function (key) {
             NS6.sendLed(side.channel, NS6.stateLeds[key], false);
@@ -195,11 +217,49 @@ NS6.shutdown = function () {
 
 // --- SHIFT -------------------------------------------------------------------
 
+// How close two presses of SHIFT have to be to count as a double-click.
+NS6.doubleClickMs = 350;
+
 // DELETE CUE / SHIFT. Held, it is the shift layer; the panel legend calls the
 // same button DELETE CUE because its primary job is erasing hot cues, which is
 // what shift+hotcue does below.
+//
+// Double-clicked, it moves the deck's hot cue bank - see NS6.toggleHotcueBank.
+// That gesture is free because SHIFT on its own does nothing at all: held or
+// tapped, it only ever changes what another button means. Nothing is taken away
+// from the panel to pay for it, which matters on a unit where every other button
+// is already mapped.
+//
+// Only the press edge is read. The release is not needed for this and, per
+// docs/MIDI-MAP.md, is the edge most easily lost on the way here.
+//
+// Two conditions, and the second is the interesting one. The presses have to be
+// close together, and *neither* may have had anything done under it: SHIFT and
+// then a hot cue to erase it, twice in a hurry, is two presses inside the window
+// and must not be read as a double-click. NS6.shiftUsed is what records that a
+// press was spent on something.
 NS6.shift = function (channel, control, value, status, group) {
-    NS6.deckState(group).shift = value > 0;
+    var state = NS6.deckState(group);
+    state.shift = value > 0;
+    if (value > 0) {
+        var doubled = state.shiftTapPending && !state.shiftUsed;
+        if (state.shiftTapPending) {
+            engine.stopTimer(state.shiftTapTimer);
+            state.shiftTapPending = false;
+            state.shiftTapTimer = null;
+        }
+        if (doubled) {
+            NS6.toggleHotcueBank(group);
+        } else {
+            state.shiftTapPending = true;
+            state.shiftTapTimer = engine.beginTimer(NS6.doubleClickMs, function () {
+                state.shiftTapPending = false;
+                state.shiftTapTimer = null;
+            }, true);
+        }
+        // Whatever this press goes on to do, it has not done it yet.
+        state.shiftUsed = false;
+    }
     var side = NS6.ledSideFor(group);
     if (side !== null) {
         NS6.sendLed(side.channel, NS6.stateLeds.shift, value > 0);
@@ -328,17 +388,49 @@ NS6.loopToggle = function (c, ctl, value, s, group) {
 
 // --- Hot cues ----------------------------------------------------------------
 
+// The panel has five hot cue buttons per deck and no pad grid, so five is all it
+// can reach at once. A bank moves the five buttons onto cues 6-10 and back,
+// which is ten per deck for the price of a gesture that was doing nothing.
+//
+// Per deck rather than per side, matching SHIFT itself: each deck keeps its own
+// bank, and the LAYER button shows the bank of the deck it brings up.
+//
+// Nothing on the panel says which bank a deck is on. There is no lamp left to
+// say it - every recorded light is already driven - so the five cue lamps show
+// the cues of whichever bank is current and nothing more. Five dark lamps mean
+// either "no cues set here" or "bank 6-10, no cues set there", and the panel
+// cannot tell those apart. That is the price of the second bank, taken knowingly.
+NS6.hotcueBase = function (state) {
+    return 1 + state.hotcueBank * 5;
+};
+
+NS6.toggleHotcueBank = function (group) {
+    var state = NS6.deckState(group);
+    state.hotcueBank = state.hotcueBank ? 0 : 1;
+    // The five lamps now follow five different controls, so they are rewired
+    // rather than merely redrawn. A deck that is not the one its side is showing
+    // has nowhere to draw, and its bank simply moves unseen.
+    var side = NS6.ledSideFor(group);
+    if (side !== null) {
+        NS6.connectHotcues(side.name);
+    }
+};
+
+// `n` is the button, 1 to 5, as it always has been. The bank is what turns it
+// into a cue number - and both branches go through it, so shift+hotcue erases
+// the cue the same button would have jumped to.
 NS6.hotcue = function (n, value, group) {
     var state = NS6.deckState(group);
+    var cue = NS6.hotcueBase(state) + n - 1;
     if (state.shift) {
         // Cue points cannot be overwritten on this unit; the manual is explicit
         // that you erase first. Shift+hotcue is that erase.
         if (value > 0) {
-            engine.setValue(group, "hotcue_" + n + "_clear", 1);
+            engine.setValue(group, "hotcue_" + cue + "_clear", 1);
         }
         return;
     }
-    engine.setValue(group, "hotcue_" + n + "_activate", value > 0 ? 1 : 0);
+    engine.setValue(group, "hotcue_" + cue + "_activate", value > 0 ? 1 : 0);
 };
 
 NS6.hotcue1 = function (c, ctl, value, s, group) { NS6.hotcue(1, value, group); };
@@ -708,12 +800,13 @@ NS6.deckLeds = {
     keylock: 0x10,
     loop_enabled: 0x15,
     reverse: 0x16,
-    hotcue_1_status: 0x0B,
-    hotcue_2_status: 0x0C,
-    hotcue_3_status: 0x0D,
-    hotcue_4_status: 0x0E,
-    hotcue_5_status: 0x0F,
 };
+
+// The five HOT CUE lamps, in panel order. Not in NS6.deckLeds, whose keys are
+// literally the Mixxx control names its connections bind to: which cue each of
+// these follows depends on the deck's bank, so the name is not fixed and the
+// generic loop cannot build them. NS6.connectHotcues does it instead.
+NS6.hotcueLeds = [0x0B, 0x0C, 0x0D, 0x0E, 0x0F];
 
 // Lights the controller drives from script state rather than from a Mixxx
 // control: the SCRATCH button, the loop MODE button, and DELETE CUE / SHIFT,
@@ -1003,6 +1096,32 @@ NS6.connectGlobal = function () {
 // connections are torn down and remade against the deck it now shows.
 NS6.connections = { A: [], B: [] };
 
+// The hot cue lamps are kept apart from the rest so a bank change can rebuild
+// five connections rather than the whole side. Rebuilding a side resends every
+// lamp on it, and docs/MIDI-MAP.md is plain about what unexpected traffic down
+// this pipe does to the device.
+NS6.hotcueConnections = { A: [], B: [] };
+
+// Bind the five lamps to the five cues the deck's bank currently reaches.
+NS6.connectHotcues = function (name) {
+    var side = NS6.sides[name];
+    NS6.hotcueConnections[name].forEach(function (c) {
+        c.disconnect();
+    });
+    NS6.hotcueConnections[name] = [];
+
+    var group = "[Channel" + side.deck + "]";
+    var base = NS6.hotcueBase(NS6.deckState(group));
+    NS6.hotcueLeds.forEach(function (cc, i) {
+        var key = "hotcue_" + (base + i) + "_status";
+        var connection = engine.makeConnection(group, key, function (value) {
+            NS6.sendLed(side.channel, cc, value > 0);
+        });
+        connection.trigger();
+        NS6.hotcueConnections[name].push(connection);
+    });
+};
+
 NS6.connectSide = function (name) {
     var side = NS6.sides[name];
     NS6.connections[name].forEach(function (c) {
@@ -1041,6 +1160,10 @@ NS6.connectSide = function (name) {
     NS6.sendLed(side.channel, NS6.stateLeds.scratch, state.scratching);
     NS6.sendLed(side.channel, NS6.stateLeds.loopMode, state.autoloop);
     NS6.sendLed(side.channel, NS6.stateLeds.shift, state.shift);
+
+    // Last, because which cues these follow is the deck's own state and not a
+    // fixed control name.
+    NS6.connectHotcues(name);
 };
 
 // The panel-wide lights, which are not per deck and so are not part of either
@@ -1110,6 +1233,18 @@ NS6.observeDeck = function (group) {
     var handler = NS6[name];
     NS6[name] = function (channel, control, value, status, group) {
         NS6.observeDeck(group);
+        // Any button press on the deck is a press that could have been spent
+        // under SHIFT, and NS6.shift reads this to tell a real shifted gesture
+        // from a double-click. Recorded here for the same reason the layer
+        // observation is: one place rather than the top of eight handlers.
+        //
+        // The note-on test is what keeps the platter out of it. The platter, the
+        // pitch fader and strip search are in this list too but are control
+        // change, and the platter reports continuously whether or not a hand is
+        // on it - it would mark every press spent within milliseconds.
+        if (name !== "shift" && (status & 0xF0) === 0x90 && value > 0) {
+            NS6.deckState(group).shiftUsed = true;
+        }
         return handler(channel, control, value, status, group);
     };
 });

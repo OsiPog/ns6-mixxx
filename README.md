@@ -43,9 +43,9 @@ driving it.
 ## What is mapped
 
 Per deck: platter (scratch and pitch bend), pitch fader with soft takeover,
-play, cue, sync, five hot cues, pitch bend and range, key lock, reverse and
-bleep, skip, tap, beat grid, strip search, and the full loop section in both
-Manual and Autoloop modes.
+play, cue, sync, ten hot cues across two banks on five buttons, pitch bend and
+range, key lock, reverse and bleep, skip, tap, beat grid, strip search, and the
+full loop section in both Manual and Autoloop modes.
 
 Mixer: four channel faders, four three-band EQs, four gains, four PFL buttons,
 crossfader and its assign switches, master, booth, headphone volume, cue blend,
@@ -88,6 +88,24 @@ mapping reload. It runs from 1/32 of a beat to 64 beats. Seeking is in beats, so
 like Autoloop it needs the track to have a beatgrid.
 
 Every other deck button ignores SHIFT rather than doing something invented for it.
+
+**Double-clicking SHIFT** moves that deck's five HOT CUE buttons between cues
+1–5 and cues 6–10, which is ten cues per deck on a panel with five buttons and no
+pad grid. The bank is per deck, as SHIFT is, so the LAYER button brings up the
+bank of the deck it brings up. Shift+hot cue erases from whichever bank you are
+on — the delete always matches the jump.
+
+The gesture is free because SHIFT alone does nothing: held or tapped, it only
+ever changes what another button means, so nothing had to be taken off the panel
+to pay for it. A double-click means two presses in a third of a second with
+*nothing done under either*. That second condition is what stops deleting two
+cues in a hurry — SHIFT, cue, SHIFT, cue — from moving the bank behind your back.
+
+**Nothing on the panel says which bank you are on.** There is no light left to
+say it, so the five lamps show the cues of the current bank and no more: five
+dark lamps mean either "no cues here" or "bank 6–10, no cues there", and the
+panel cannot tell you which. That is the price of the second bank, and it is
+worth knowing before you go looking for a cue that is on the other one.
 
 Deck switching needs nothing from Mixxx: the LAYER buttons make a deck side
 transmit on a different MIDI channel, and all four channels are mapped.
@@ -163,8 +181,9 @@ alternate deck whichever one is showing. See
 Every recorded light is driven. Besides the obvious ones, that means the
 pitch fader's centre detent and its two soft-takeover arrows, the four LOOP
 CONTROL buttons — which follow whichever mode the section is in, so in Autoloop
-they show the length of the loop you have — and the SHIFT button while it is
-held. CRATES, PREPARE and FILES have no state to show and are simply lit;
+they show the length of the loop you have — the five HOT CUE buttons, which
+follow whichever bank the deck is on, and the SHIFT button while it is held.
+CRATES, PREPARE and FILES have no state to show and are simply lit;
 `NS6.litNavButtons` turns that off.
 
 Some of the panel is not lamps at all but **displays**, whose value is a position
