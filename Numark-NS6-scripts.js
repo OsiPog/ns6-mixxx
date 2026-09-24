@@ -27,52 +27,82 @@ NS6.debug = false;
 
 // --- Tuning ------------------------------------------------------------------
 
-// Ticks the platter reports per full revolution. This is meant to be the
-// hardware's number rather than a feel setting: the platter sends a 14-bit
-// absolute position that wraps, and the assumption here is that one turn is the
-// whole 14-bit range. That has not been confirmed against the wheel with a
-// counted number of turns - if it is wrong, everything the platter does is off
-// by the same factor, so it is the first thing to check.
-NS6.ticksPerRevolution = 16384;
+// --- Hardware, not preferences ---
 
-// Turns of a 33 1/3 record per turn of the platter, while scratching. At 1 the
-// platter behaves as a 12" turntable; the NS6's wheel is roughly half that
-// across, so 1 makes the same gesture at the rim cover half the audio a
-// turntable would, which is what "too slow" feels like. 2 matches the rim
-// travel instead. Raise it to scratch faster.
-NS6.scratchSensitivity = 2;
+// The platter reports a 14-bit absolute position that wraps, so positions live
+// on a circle whose circumference is the full 14-bit range. This is the modulus
+// the wrap correction needs, and it is a property of the message format rather
+// than of the wheel or of anyone's taste. Nothing else may use it.
+NS6.platterModulus = 16384;
 
-// Platter RPM the scratch filter assumes. 33 1/3 is the usual choice and matches
-// what the platter is silk-screened for.
+// Ticks one physical turn of the platter emits. A measured property of the
+// hardware, and the number everything else is expressed against: if it is
+// wrong, scratch, bend and skip are all off by the same factor.
+//
+// It has NOT been counted against the wheel. `ns6 jog` in the driver reports
+// it; spin a counted number of turns and divide. 16384 here is the assumption
+// that one turn is exactly one wrap of the position - plausible, unverified,
+// and the first thing to check if the wheel feels geared wrong.
+NS6.platterTicksPerRev = 16384;
+
+// Revolutions per minute the scratch filter treats as normal speed. 33 1/3 is
+// what the platter is silk-screened for. It only ever appears alongside
+// scratchTurnsPerRev below, and the two multiply into a single number, so this
+// stays a constant and that one is the knob.
 NS6.scratchRpm = 33 + 1 / 3;
 
-// Alpha and beta turn Mixxx's scratch filter off rather than tune it.
+// Mixxx's scratch filter is an alpha-beta tracker stepped every millisecond.
+// Beta is the term that produces the velocity the deck actually plays at; alpha
+// only tunes the position estimate feeding it. These are the values Mixxx
+// mappings normally use, and they settle in tens of milliseconds.
 //
-// The filter is an alpha-beta estimator: alpha is how much it believes each new
-// position, beta how much velocity it carries between them. The usual 1/8 and
-// 1/256 smooth the platter and, more to the point, keep a velocity going after
-// the reports stop - so stopping the wheel by hand leaves the deck coasting
-// down instead of stopping.
-//
-// alpha 1 takes each position exactly as reported. beta 0 removes the velocity
-// term entirely, so nothing is carried between reports and the audio only moves
-// when the platter does. The deck stops when your hand does, and the wheel gets
-// whatever resolution it has rather than an interpolation of it.
-NS6.scratchAlpha = 1.0;
-NS6.scratchBeta = 0.0;
+// Both must be non-zero. engine.scratchEnable guards its arguments with
+// `if (alpha && beta)`, so a zero in either one makes Mixxx discard the pair
+// and quietly substitute its timecode-vinyl defaults - alpha 1/512, a tracker
+// needing the better part of a second to reach the speed of your hand. That is
+// what "the wheel has to go round several times before anything happens" was.
+NS6.scratchAlpha = 1 / 8;
+NS6.scratchBeta = (1 / 8) / 32;
 
-// Jog units sent per full revolution when the platter is bending pitch rather
-// than scratching. Mixxx scales this down hard before it reaches the rate - it
-// multiplies by 0.1 and then averages the last 25 readings - so the number has
-// to be large before the bend is felt at all. Raise it to bend harder.
-NS6.bendPerRevolution = 800;
+// --- Feel: one knob per thing the platter does ---
+
+// Turns of a 33 1/3 record per turn of the platter, while scratching. At 1 the
+// platter covers what a 12" turntable would; the NS6 wheel is about half that
+// diameter, so 2 makes a gesture at the rim travel the same audio. Raise it to
+// scratch faster.
+NS6.scratchTurnsPerRev = 2;
+
+// Pitch bend depth: the rate offset produced by turning the platter at one
+// revolution per second. 0.5 means that speed plays the track half again as
+// fast, and the offset is proportional, so half that speed bends half as hard.
+//
+// This drives Mixxx's `wheel` control, which is added to the rate unfiltered.
+// The older `jog` control is deliberately not used: Mixxx runs every write to
+// it through a 25-tap moving average, about 280ms of lag before the bend is
+// felt at all. `wheel` has none, at the cost of not springing back on its own -
+// see NS6.platterIdleMs.
+NS6.bendStrength = 0.5;
+
+// As far as the bend may go, so a hard spin cannot throw the rate somewhere
+// absurd. Negative rates stay reachable on purpose: pushing the platter
+// backwards past a standstill plays backwards, as a record would.
+NS6.bendLimit = 2.0;
+
+// Beats jumped per platter revolution while SKIP is held.
+NS6.beatsPerRev = 16;
+
+// How long the platter must go quiet before the wheel counts as released.
+//
+// This platter has no touch sensor - nothing in the recording says whether a
+// hand is on it - so a gap in the reports is the only "let go" signal there is.
+// It is what returns the bend to zero and what ends a scratch. Too short and a
+// slow turn keeps releasing under your hand; too long and the deck hangs on
+// after you stop.
+NS6.platterIdleMs = 60;
 
 // PITCH RANGE cycles through these, matching the values the button is labelled
 // with on the panel.
 NS6.pitchRanges = [0.08, 0.16, 0.50];
-
-// Beats jumped per platter revolution while SKIP is held.
-NS6.beatsPerRevolution = 16;
 
 // --- State -------------------------------------------------------------------
 
@@ -92,15 +122,31 @@ NS6.deckState = function (group) {
             // cues 1-5, 1 for 6-10. The panel has five hot cue buttons and no
             // pad grid, so a bank is the only way past five cues.
             hotcueBank: 0,
-            // The platter is a motorised turntable: scratching is off until the
-            // SCRATCH button turns it on, exactly as the hardware behaves.
-            scratching: false,
+            // What the SCRATCH and SKIP buttons are asking for. These are the
+            // only inputs to the platter's mode; see NS6.platterMode.
+            scratchArmed: false,
             skipping: false,
             // Autoloop mode is what the four bottom LOOP CONTROL buttons do by
             // default on this unit.
             autoloop: true,
             platterMsb: 0,
             lastPosition: null,
+            // What the platter did with its last turn, so that changing mode
+            // part-way through a gesture can put the previous mode's control
+            // back. Null until the wheel is first moved.
+            platterMode: null,
+            // There is no touch sensor, so "let go" is a gap in the reports.
+            // This timer is that gap; NS6.platterKeepAlive restarts it on every
+            // turn, so it only ever fires once the wheel has actually stopped.
+            platterIdleTimer: null,
+            platterLastMs: null,
+            // engine.scratchEnable is on for this deck. Tracked because it may
+            // not be left on: while it is, scratch2 owns the deck's rate
+            // outright and the track cannot play normally.
+            scratchEnabled: false,
+            // Fractional beats the platter has turned through under SKIP,
+            // carried until they add up to a whole beat worth jumping.
+            skipBeats: 0,
             pitchRangeIndex: 0,
             // Where the pitch fader physically is. Null until it first
             // reports, because until then nothing knows: the fader is not a
@@ -122,13 +168,12 @@ NS6.applySettings = function () {
         var value = engine.getSetting(name);
         return value === undefined || value === null ? current : value;
     };
-    NS6.scratchSensitivity = setting("scratchSensitivity", NS6.scratchSensitivity);
-    NS6.bendPerRevolution = setting("bendPerRevolution", NS6.bendPerRevolution);
-    NS6.ticksPerRevolution = setting("ticksPerRevolution", NS6.ticksPerRevolution);
-    // Only alpha is exposed. Raising beta off zero is what makes the platter
-    // coast after your hand stops it, which is the thing this mapping set out
-    // to avoid, so it stays where it is.
-    NS6.scratchAlpha = setting("scratchSmoothing", NS6.scratchAlpha);
+    // Only the two feel knobs are exposed. platterTicksPerRev is a measurement
+    // and platterModulus is a fact about the message format; neither is
+    // anyone's preference, and letting the modulus be edited would break the
+    // wrap correction rather than change how the wheel feels.
+    NS6.scratchTurnsPerRev = setting("scratchTurnsPerRev", NS6.scratchTurnsPerRev);
+    NS6.bendStrength = setting("bendStrength", NS6.bendStrength);
 };
 
 // Mixxx opens the controller's MIDI output *after* it runs init(), so anything
@@ -155,8 +200,14 @@ NS6.init = function () {
 
 NS6.shutdown = function () {
     for (var group in NS6.decks) {
-        if (NS6.decks[group].scratching) {
-            engine.scratchDisable(script.deckFromGroup(group));
+        // The platter leaves two things behind that outlive the script: a
+        // scratch that owns the deck's rate, and a bend offset that does not
+        // spring back on its own. Both would freeze the deck at whatever it was
+        // doing when Mixxx closed.
+        NS6.platterRelease(group, false);
+        if (NS6.decks[group].platterIdleTimer !== null) {
+            engine.stopTimer(NS6.decks[group].platterIdleTimer);
+            NS6.decks[group].platterIdleTimer = null;
         }
         // A SHIFT press within the last third of a second leaves a timer still
         // waiting to say the double-click window has closed.
@@ -441,11 +492,69 @@ NS6.hotcue5 = function (c, ctl, value, s, group) { NS6.hotcue(5, value, group); 
 
 // --- Platter -----------------------------------------------------------------
 
-// Ticks a record revolution is worth, which is what engine.scratchEnable wants.
-// Fewer ticks per record revolution means the same gesture covers more audio,
-// so this is where scratchSensitivity does its work.
+// The platter has three jobs and no touch sensor, which between them decide the
+// shape of everything below.
+//
+// The three jobs are picked by NS6.platterMode and each has its own Mixxx
+// control; nothing here shares a destination with anything else, so there is no
+// state to keep beyond which mode the buttons are asking for.
+//
+// The missing touch sensor is the harder half. Nothing the hardware sends says
+// whether a hand is on the wheel, so "let go" has to be inferred from the
+// reports stopping - NS6.platterIdleMs of quiet. One timer per deck does that,
+// and it is what returns the bend to zero and what ends a scratch. It replaces
+// the enable/disable calls the SCRATCH and SKIP handlers used to make by hand.
+
+// What the platter should do with the turn it just reported.
+NS6.platterMode = function (group, state) {
+    if (state.skipping) {
+        return "skip";
+    }
+    // A stopped deck scrubs like a record whether or not SCRATCH is lit: there
+    // is nothing to bend the pitch of, and hunting for a cue point by hand is
+    // the only thing the wheel is good for while the track is not moving.
+    if (state.scratchArmed || engine.getValue(group, "play") !== 1) {
+        return "scratch";
+    }
+    return "bend";
+};
+
+// Ticks that make up one revolution of the imagined record, which is what
+// engine.scratchEnable is asking for. Fewer ticks per record revolution means
+// the same gesture covers more audio, so this is where scratchTurnsPerRev does
+// its work.
 NS6.scratchIntervals = function () {
-    return NS6.ticksPerRevolution / NS6.scratchSensitivity;
+    return NS6.platterTicksPerRev / NS6.scratchTurnsPerRev;
+};
+
+// Hand the deck back: stop any scratch and take the bend off. Safe to call on a
+// deck that is doing neither, which is why the idle timer and shutdown can both
+// just call it.
+//
+// `ramp` eases a scratch back to playback speed the way letting go of a record
+// does. It is wanted on release and not on shutdown, where there is nothing
+// left to ease into.
+NS6.platterRelease = function (group, ramp) {
+    var state = NS6.deckState(group);
+    if (state.scratchEnabled) {
+        engine.scratchDisable(script.deckFromGroup(group), ramp);
+        state.scratchEnabled = false;
+    }
+    engine.setValue(group, "wheel", 0);
+    state.platterLastMs = null;
+};
+
+// Restart the "has the wheel gone quiet?" countdown. Called on every turn, so
+// it only fires once the platter has been still for NS6.platterIdleMs.
+NS6.platterKeepAlive = function (group) {
+    var state = NS6.deckState(group);
+    if (state.platterIdleTimer !== null) {
+        engine.stopTimer(state.platterIdleTimer);
+    }
+    state.platterIdleTimer = engine.beginTimer(NS6.platterIdleMs, function () {
+        NS6.deckState(group).platterIdleTimer = null;
+        NS6.platterRelease(group, true);
+    }, true);
 };
 
 // The platter reports absolute position as a 14-bit value that wraps, MSB then
@@ -463,71 +572,124 @@ NS6.platterLsb = function (channel, control, value, status, group) {
         return;
     }
 
-    // Shortest way round the circle, so a wrap past zero is a small step rather
-    // than a full-scale jump.
+    // Shortest way round the circle, so a wrap past zero reads as the small
+    // step it was rather than a jump the length of the whole range. The
+    // circumference is the 14-bit modulus and nothing else: using a tunable
+    // number here would corrupt every delta larger than half of it.
     var delta = position - state.lastPosition;
-    var half = NS6.ticksPerRevolution / 2;
+    var half = NS6.platterModulus / 2;
     if (delta > half) {
-        delta -= NS6.ticksPerRevolution;
+        delta -= NS6.platterModulus;
     } else if (delta < -half) {
-        delta += NS6.ticksPerRevolution;
+        delta += NS6.platterModulus;
     }
     state.lastPosition = position;
 
     if (delta === 0) {
+        // The platter is understood to report whether or not it is being
+        // turned, so most of what arrives is this. Returning before the idle
+        // timer is kicked is the point: only movement keeps the wheel alive,
+        // or a resting platter would hold the last bend open forever.
         return;
     }
 
-    var deck = script.deckFromGroup(group);
+    var revolutions = delta / NS6.platterTicksPerRev;
+    var mode = NS6.platterMode(group, state);
 
-    if (state.skipping) {
-        // SKIP held: the platter jumps by beat instead of moving audio.
-        var beats = delta / NS6.ticksPerRevolution * NS6.beatsPerRevolution;
-        engine.setValue(group, "beatjump", beats);
-        return;
+    // Changing mode mid-turn must not leave the previous one's control set:
+    // a bend held at some offset, or a scratch still owning the rate.
+    if (state.platterMode !== mode) {
+        NS6.platterRelease(group, false);
+        state.platterMode = mode;
     }
 
-    if (state.scratching) {
-        engine.scratchTick(deck, delta);
-        return;
+    if (mode === "skip") {
+        NS6.platterSkip(group, state, revolutions);
+    } else if (mode === "scratch") {
+        NS6.platterScratch(group, state, delta);
+    } else {
+        NS6.platterBend(group, state, revolutions);
     }
 
-    // Not scratching: the platter bends pitch, which is what the manual says it
-    // does when SCRATCH is off.
-    engine.setValue(group, "jog", delta / NS6.ticksPerRevolution * NS6.bendPerRevolution);
+    NS6.platterKeepAlive(group);
 };
 
-// SCRATCH turns Scratch Mode on and off. The button lights while it is on.
+// SKIP held: the platter jumps by beat instead of moving audio.
+//
+// The turn is accumulated and spent a whole beat at a time. Handing Mixxx the
+// raw fraction instead would fire a seek on every report - thousands of them
+// per revolution, each a few thousandths of a beat - which stutters rather than
+// jumps.
+NS6.platterSkip = function (group, state, revolutions) {
+    state.skipBeats += revolutions * NS6.beatsPerRev;
+    var whole = state.skipBeats > 0
+        ? Math.floor(state.skipBeats)
+        : Math.ceil(state.skipBeats);
+    if (whole !== 0) {
+        engine.setValue(group, "beatjump", whole);
+        state.skipBeats -= whole;
+    }
+};
+
+// Scratch: the turn goes to Mixxx's scratch filter, which owns the deck's rate
+// for as long as it is enabled. That is why it is switched on at the first turn
+// rather than by the SCRATCH button - a deck left with scratch enabled cannot
+// play, because scratch2 overrides the rate outright.
+NS6.platterScratch = function (group, state, delta) {
+    var deck = script.deckFromGroup(group);
+    if (!state.scratchEnabled) {
+        engine.scratchEnable(deck, NS6.scratchIntervals(), NS6.scratchRpm,
+                             NS6.scratchAlpha, NS6.scratchBeta);
+        state.scratchEnabled = true;
+    }
+    engine.scratchTick(deck, delta);
+};
+
+// Bend: the turn becomes a speed, and the speed becomes a rate offset Mixxx
+// adds to the deck unfiltered.
+//
+// It has to be a speed rather than a distance. `wheel` is a standing offset
+// with no spring-back, so what it wants is "how fast is the hand moving now",
+// which means dividing by the time since the last report rather than trusting
+// the reports to arrive evenly.
+NS6.platterBend = function (group, state, revolutions) {
+    var now = Date.now();
+    var elapsed = state.platterLastMs === null ? 0 : now - state.platterLastMs;
+    state.platterLastMs = now;
+
+    // First turn of a gesture, or two reports inside the same millisecond:
+    // there is no interval to divide by yet. Wait for the next one rather than
+    // divide by zero - at these intervals it is a millisecond away.
+    if (elapsed <= 0) {
+        return;
+    }
+
+    var revsPerSecond = revolutions / (elapsed / 1000);
+    var offset = revsPerSecond * NS6.bendStrength;
+    engine.setValue(group, "wheel",
+                    Math.max(-NS6.bendLimit, Math.min(NS6.bendLimit, offset)));
+};
+
+// SCRATCH and SKIP only say what the platter should do with the next turn. The
+// switching itself belongs to the platter, which is the only thing that knows
+// when a gesture starts and - through the idle timer - when it ends.
 NS6.scratchMode = function (channel, control, value, status, group) {
     if (value === 0) {
         return;
     }
     var state = NS6.deckState(group);
-    var deck = script.deckFromGroup(group);
-    state.scratching = !state.scratching;
-    if (state.scratching) {
-        engine.scratchEnable(deck, NS6.scratchIntervals(), NS6.scratchRpm,
-                             NS6.scratchAlpha, NS6.scratchBeta);
-    } else {
-        engine.scratchDisable(deck);
-    }
-    NS6.sendLed(NS6.sideOf(deck).channel, NS6.stateLeds.scratch, state.scratching);
+    state.scratchArmed = !state.scratchArmed;
+    NS6.sendLed(NS6.sideOf(script.deckFromGroup(group)).channel,
+                NS6.stateLeds.scratch, state.scratchArmed);
 };
 
-// SKIP is a hold, not a toggle: while it is down the platter jumps by beat and
-// scratching is suspended, which is what the hardware does.
+// SKIP is a hold, not a toggle: the platter jumps by beat while it is down.
 NS6.skip = function (channel, control, value, status, group) {
     var state = NS6.deckState(group);
     state.skipping = value > 0;
-    if (state.scratching) {
-        var deck = script.deckFromGroup(group);
-        if (state.skipping) {
-            engine.scratchDisable(deck);
-        } else {
-            engine.scratchEnable(deck, NS6.scratchIntervals(), NS6.scratchRpm,
-                                 NS6.scratchAlpha, NS6.scratchBeta);
-        }
-    }
+    // Part of a beat turned through under one press should not be spent by the
+    // next one, possibly minutes later.
+    state.skipBeats = 0;
 };
 
 // --- STRIP SEARCH ------------------------------------------------------------
@@ -1157,7 +1319,7 @@ NS6.connectSide = function (name) {
 
     // Script-held state does not come from a Mixxx control, so push it here.
     var state = NS6.deckState(group);
-    NS6.sendLed(side.channel, NS6.stateLeds.scratch, state.scratching);
+    NS6.sendLed(side.channel, NS6.stateLeds.scratch, state.scratchArmed);
     NS6.sendLed(side.channel, NS6.stateLeds.loopMode, state.autoloop);
     NS6.sendLed(side.channel, NS6.stateLeds.shift, state.shift);
 
@@ -1215,6 +1377,12 @@ NS6.observeDeck = function (group) {
     if (side.deck === deck) {
         return;
     }
+    // Decks 1 and 3 are the same physical platter, and each keeps its own last
+    // position. The one being switched to holds wherever the wheel was when
+    // that layer was last live, which may be minutes and many turns ago, so the
+    // first report after the flip would read as a jump of up to half a
+    // revolution. Forget it and let the next report re-seed.
+    NS6.deckState(group).lastPosition = null;
     side.deck = deck;
     NS6.connectSide(side.name);
 };
