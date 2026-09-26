@@ -43,9 +43,9 @@ driving it.
 ## What is mapped
 
 Per deck: platter (scratch and pitch bend), pitch fader with soft takeover,
-play, cue, sync, ten hot cues across two banks on five buttons, pitch bend and
-range, key lock, reverse and bleep, skip, tap, beat grid, strip search, and the
-full loop section in both Manual and Autoloop modes.
+play, cue, sync, fifteen hot cues across five layers on five buttons, pitch
+bend and range, key lock, reverse and bleep, skip, tap, beat grid, strip
+search, and the full loop section in both Manual and Autoloop modes.
 
 Mixer: four channel faders, four three-band EQs, four gains, four PFL buttons,
 crossfader and its assign switches, master, booth, headphone volume, cue blend,
@@ -89,23 +89,26 @@ like Autoloop it needs the track to have a beatgrid.
 
 Every other deck button ignores SHIFT rather than doing something invented for it.
 
-**Double-clicking SHIFT** moves that deck's five HOT CUE buttons between cues
-1–5 and cues 6–10, which is ten cues per deck on a panel with five buttons and no
-pad grid. The bank is per deck, as SHIFT is, so the LAYER button brings up the
-bank of the deck it brings up. Shift+hot cue erases from whichever bank you are
-on — the delete always matches the jump.
+**Holding SKIP** turns the five HOT CUE buttons into a layer picker. The deck
+keeps a hot cue layer from 1 to 5, and while SKIP is down the five cue lamps stop
+showing cues and show the layer instead — the one button that is the current
+layer lit, the other four dark. Press a button and the deck moves onto that
+layer. Let SKIP go and the lamps go back to showing cues.
 
-The gesture is free because SHIFT alone does nothing: held or tapped, it only
-ever changes what another button means, so nothing had to be taken off the panel
-to pay for it. A double-click means two presses in a third of a second with
-*nothing done under either*. That second condition is what stops deleting two
-cues in a hurry — SHIFT, cue, SHIFT, cue — from moving the bank behind your back.
+Five buttons across five layers is twenty-five bindings. **Fifteen of them are
+wired**, in order: layer 1 is hot cues 1–5, layer 2 is hot cues 6–10, layer 3 is
+hot cues 11–15. Layers 4 and 5 are spare. Their buttons do nothing when pressed
+and their lamps stay dark; they are there for whatever gets put on them next.
 
-**Nothing on the panel says which bank you are on.** There is no light left to
-say it, so the five lamps show the cues of the current bank and no more: five
-dark lamps mean either "no cues here" or "bank 6–10, no cues there", and the
-panel cannot tell you which. That is the price of the second bank, and it is
-worth knowing before you go looking for a cue that is on the other one.
+The layer is per deck, as SHIFT is, so the LAYER button brings up the layer of
+the deck it brings up. Shift+hot cue erases from whichever layer you are on — the
+delete always matches the jump.
+
+The gesture is free. SKIP held is the platter's beat-jump modifier, so the hand
+that uses it is on the wheel; nothing was reading SKIP together with a hot cue
+button before, and nothing had to be taken off the panel to pay for it. It also
+answers the question a plain bank could not: with the lamps borrowed to say which
+layer you are on, dark cue lamps mean "no cues here" and only that.
 
 Deck switching needs nothing from Mixxx: the LAYER buttons make a deck side
 transmit on a different MIDI channel, and all four channels are mapped.
@@ -157,6 +160,10 @@ Three things, picked in `NS6.platterMode`:
 | SKIP held | jumps by beat, `beatsPerRev` to a turn |
 | SCRATCH lit, or the deck is stopped | scratches |
 | otherwise | bends the pitch |
+
+SKIP has a second job while it is held: it turns the five HOT CUE buttons into
+the hot cue layer picker described above. The two do not collide — one is the
+wheel, the other is the cue buttons.
 
 A stopped deck scrubs whether or not SCRATCH is lit — there is no pitch to bend,
 and hunting for a cue by hand is the only thing the wheel is good for while the
@@ -210,7 +217,8 @@ Every recorded light is driven. Besides the obvious ones, that means the
 pitch fader's centre detent and its two soft-takeover arrows, the four LOOP
 CONTROL buttons — which follow whichever mode the section is in, so in Autoloop
 they show the length of the loop you have — the five HOT CUE buttons, which
-follow whichever bank the deck is on, and the SHIFT button while it is held.
+follow whichever hot cue layer the deck is on and are borrowed to show that
+layer while SKIP is held, and the SHIFT button while it is held.
 CRATES, PREPARE and FILES have no state to show and are simply lit;
 `NS6.litNavButtons` turns that off.
 
